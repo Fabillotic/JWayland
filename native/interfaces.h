@@ -1,0 +1,3 @@
+extern struct wl_interface wl_display_interface;
+extern struct wl_interface wl_callback_interface;
+extern struct wl_interface wl_registry_interface;

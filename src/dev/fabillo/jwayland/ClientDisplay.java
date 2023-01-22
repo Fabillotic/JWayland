@@ -1,8 +1,10 @@
 package dev.fabillo.jwayland;
 
+import dev.fabillo.jwayland.protocol.WLDisplay;
+
 public class ClientDisplay {
 	
-	private long native_ptr = 0;
+	protected long native_ptr = 0;
 	
 	private ClientDisplay() {
 	}
@@ -25,6 +27,12 @@ public class ClientDisplay {
 	private static native void init_jni();
 	private native void connect_name(String name);
 	private native void connect_fd(int fd);
+	
+	public WLDisplay getProxy() {
+		WLDisplay display = new WLDisplay();
+		display.native_ptr = native_ptr;
+		return display;
+	}
 	
 	public native void disconnect();
 	public native void dispatch();

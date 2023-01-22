@@ -32,6 +32,8 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1name(JNI
 
 	if(name) (*env)->ReleaseStringUTFChars(env, name, name_str);
 
+	printf("display: %p\n", display);
+	fflush(stdout);
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
