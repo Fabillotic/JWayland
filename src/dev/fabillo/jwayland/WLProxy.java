@@ -13,7 +13,7 @@ public class WLProxy {
 	
 	@Override
 	public String toString() {
-		return "PROXY(" + native_ptr + ")";
+		return "PROXY(0x" + Long.toHexString(native_ptr) + ")";
 	}
 	
 }
