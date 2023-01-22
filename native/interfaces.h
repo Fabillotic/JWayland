@@ -1,3 +1,2 @@
-extern struct wl_interface wl_display_interface;
-extern struct wl_interface wl_callback_interface;
-extern struct wl_interface wl_registry_interface;
+extern struct wl_interface *interfaces[];
+struct wl_interface *get_interface_by_name(char *name);

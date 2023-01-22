@@ -11,4 +11,9 @@ public class WLProxy {
 		this.native_ptr = native_ptr;
 	}
 	
+	@Override
+	public String toString() {
+		return "PROXY(" + native_ptr + ")";
+	}
+	
 }

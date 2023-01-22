@@ -8,6 +8,7 @@ import dev.fabillo.jwayland.annotation.WLRequest;
 public class WLRegistry extends WLProxy {
 	
 	public static WLRegistry fromProxy(WLProxy proxy) {
+		if(proxy == null) return null;
 		WLRegistry registry = new WLRegistry();
 		registry.native_ptr = proxy.native_ptr;
 		return registry;

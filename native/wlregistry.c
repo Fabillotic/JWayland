@@ -11,14 +11,25 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_protocol_WLRegistry_bind(JNI
 	jmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");
 
 	struct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);
-	union wl_argument args[3];
+	union wl_argument args[4];
 	args[0].u = (uint32_t) name;
 	args[1].s = (*env)->GetStringUTFChars(env, iface, NULL);
 	args[2].u = (uint32_t) version;
-	struct wl_proxy *nproxy = wl_proxy_marshal_array_constructor(wproxy, 0, args, &wl_callback_interface); /* TODO: Get interface from iface */
-	jobject prox = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
-	(*env)->SetLongField(env, prox, WLProxy_native_ptr, (jlong)(intptr_t)nproxy);
-	return prox;
+	args[3].n = (uint32_t) 0;
+	struct wl_interface *inf = get_interface_by_name((*env)->GetStringUTFChars(env, iface, NULL));
+	printf("DA interface: '%s', %p\n", args[1].s, inf);
+	fflush(stdout);
+	struct wl_proxy *nproxy;
+	if(inf) {
+		nproxy = wl_proxy_marshal_array_constructor(wproxy, 0, args, inf);
+		jobject prox = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
+		(*env)->SetLongField(env, prox, WLProxy_native_ptr, (jlong)(intptr_t)nproxy);
+		return prox;
+	}
+	/*else {
+		wl_proxy_marshal_array(wproxy, 0, args);
+	}*/
+	return NULL;
 }
 
 int wlregistry_dispatcher(const void *implementation, void *target, uint32_t opcode, const struct wl_message *msg, union wl_argument *args) {

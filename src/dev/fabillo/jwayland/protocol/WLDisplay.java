@@ -8,6 +8,7 @@ import dev.fabillo.jwayland.annotation.WLRequest;
 public class WLDisplay extends WLProxy {
 	
 	public static WLDisplay fromProxy(WLProxy proxy) {
+		if(proxy == null) return null;
 		WLDisplay display = new WLDisplay();
 		display.native_ptr = proxy.native_ptr;
 		return display;

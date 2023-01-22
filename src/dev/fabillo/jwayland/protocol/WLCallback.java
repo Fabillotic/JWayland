@@ -7,6 +7,7 @@ import dev.fabillo.jwayland.annotation.WLEvent;
 public class WLCallback extends WLProxy {
 	
 	public static WLCallback fromProxy(WLProxy proxy) {
+		if(proxy == null) return null;
 		WLCallback callback = new WLCallback();
 		callback.native_ptr = proxy.native_ptr;
 		return callback;
