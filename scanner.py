@@ -183,6 +183,8 @@ def make_c_glue(iface):
     d += '#include "util.h"\n'
     d += "\n"
     for opcode, req in enumerate(iface["requests"]):
+        if opcode > 0:
+            d += '\n'
         d += "JNIEXPORT "
         d += "jobject " if req["return_proxy"] else "void "
         d += "JNICALL "
@@ -215,7 +217,44 @@ def make_c_glue(iface):
         d += '\n'
         d += '\tstruct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);\n'
         if req["return_proxy"]:
-            d += '\treturn NULL;'
+            d += '\tconst struct wl_interface *inf = get_interface_by_name((*env)->GetStringUTFChars(env, '
+            if req["sun"]:
+                d += 'interface_name' #argument for interface name
+            else:
+                for n, arg in enumerate(req["args"]):
+                    if arg["type"] == "new_id":
+                        d += arg["interface"]
+                        break
+                else:
+                    print("ERROR: Failed to find new_id argument interface name!")
+                    return
+            d += ', NULL));\n'
+            d += '\tif(!inf) return NULL;\n'
+            d += '\tstruct wl_proxy *nproxy = wl_proxy_marshal_constructor(wproxy, '
+            d += str(opcode)
+            d += ", inf"
+            for arg in req["args"]:
+                d += ', '
+                if arg["type"] in ["int", "fixed", "fd"]:
+                    d += '(int32_t) ' + sanitize_name(arg["name"])
+                elif arg["type"] == "uint":
+                    d += '(uint32_t) ' + sanitize_name(arg["name"])
+                elif arg["type"] == "string":
+                    d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
+                elif arg["type"] == "object":
+                    d += '(struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr)'
+                elif arg["type"] == "array":
+                    d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
+                elif arg["type"] == "new_id":
+                    d += '(uint32_t) 0'
+                else:
+                    print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                    return
+            d += ');\n';
+            d += '\tif(!nproxy) return NULL;\n'
+            d += '\tjobject prox = (*env)->NewObject(env, WLProxy_class, WLProxy_init);\n'
+            d += '\t(*env)->SetLongField(env, prox, WLProxy_native_ptr, (jlong)(intptr_t)nproxy);\n'
+            d += '\treturn prox;\n'
         else:
             d += '\twl_proxy_marshal(wproxy, '
             d += str(opcode)
@@ -234,8 +273,7 @@ def make_c_glue(iface):
                 else:
                     print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                     return
-            d += ');';
-        d += '\n'
+            d += ');\n';
         d += "}\n"
     return d
 
