@@ -21,8 +21,6 @@ struct wl_interface *get_interface_by_name(char *name) {
 	int i;
 
 	for(i = 0; i < sizeof(interfaces) / sizeof(intptr_t); i++) {
-		printf("i: %d, n: %d, s: '%s'\n", i, (sizeof(interfaces) / sizeof(intptr_t)), interfaces[i]->name);
-		fflush(stdout);
 		if(!strcmp(interfaces[i]->name, name)) {
 			return interfaces[i];
 		}

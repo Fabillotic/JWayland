@@ -14,7 +14,7 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_protocol_WLDisplay_sync(JNIE
 	struct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);
 	union wl_argument args[1];
 	args[0].n = 0;
-	struct wl_proxy *nproxy = wl_proxy_marshal_array_constructor(wproxy, 0, args, &wl_callback_interface);
+	struct wl_proxy *nproxy = wl_proxy_marshal_array_constructor(wproxy, 0, args, get_interface_by_name("wl_callback"));
 	jobject prox = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
 	(*env)->SetLongField(env, prox, WLProxy_native_ptr, (jlong)(intptr_t)nproxy);
 	return prox;
@@ -28,7 +28,7 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_protocol_WLDisplay_get_1regi
 	struct wl_proxy *proxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);
 	union wl_argument args[1];
 	args[0].n = 0;
-	struct wl_proxy *nproxy = wl_proxy_marshal_array_constructor(proxy, 1, args, &wl_registry_interface);
+	struct wl_proxy *nproxy = wl_proxy_marshal_array_constructor(proxy, 1, args, get_interface_by_name("wl_registry"));
 	jobject prox = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
 	(*env)->SetLongField(env, prox, WLProxy_native_ptr, (jlong)(intptr_t)nproxy);
 	return prox;
