@@ -16,6 +16,10 @@ def main():
         if j == None:
             return
         print(j)
+        c = make_c_glue(i)
+        if c == None:
+            return
+        print(c)
         #f = open(i["camel_name"] + ".java.test", "w")
         #f.write(j)
         #f.close()
@@ -163,6 +167,45 @@ def make_java_proxy(iface):
     d += "\t}\n"
     d += "\t\n"
     d += "}\n"
+    return d
+
+def make_c_glue(iface):
+    cname = iface["camel_name"]
+    d = ""
+    d += "#include <jni.h>\n"
+    d += "#include <stdio.h>\n"
+    d += "#include <stdint.h>\n"
+    d += "#include <wayland-client-core.h>\n"
+    d += '#include "interfaces.h"\n'
+    d += '#include "util.h"\n'
+    d += "\n"
+    for n, req in enumerate(iface["requests"]):
+        d += "JNIEXPORT "
+        d += "jobject " if req["return_proxy"] else "void "
+        d += "JNICALL "
+        d += "Java_dev_fabillo_jwayland_protocol_"
+        d += cname
+        d += "_"
+        d += req["name"].replace("_", "_1")
+        d += "(JNIEnv *env, jobject obj"
+        for arg in req["args"]:
+            if arg["type"] == "new_id":
+                continue
+            d += ", "
+            if arg["type"] in ["int", "uint", "fixed", "fd"]:
+                d += "jint "
+            elif arg["type"] == "string":
+                d += "jstring "
+            elif arg["type"] == "object":
+                d += "jobject "
+            elif arg["type"] == "array":
+                d += "jint " #TODO: Placeholder, arrays unimplemented
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+            d += sanitize_name(arg["name"])
+        d += ") {"
+        d += "}\n"
     return d
 
 def sanitize_name(name):
