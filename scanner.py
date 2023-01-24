@@ -21,11 +21,13 @@ def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
     print(f"\n{r['name']}")
     r["camel_name"] = ""
+    first_underscore = False
     for n, c in enumerate(r["name"]):
-        if n == 0:
-            r["camel_name"] += c.upper()
-        elif c != "_":
+        if c != "_":
             if r["name"][n - 1] == "_":
+                first_underscore = True
+                r["camel_name"] += c.upper()
+            elif not first_underscore:
                 r["camel_name"] += c.upper()
             else:
                 r["camel_name"] += c
@@ -128,6 +130,33 @@ def make_java_proxy(iface):
         d += "\t\n"
     d += f"\tpublic static interface {lname}" + " {\n"
     d += "\t\t\n"
+    for n, ev in enumerate(iface["events"]):
+        if n > 0:
+            d += "\t\t\n"
+        d += "\t\t@WLEvent\n"
+        d += f"\t\tpublic void {ev['name']}("
+        for n, arg in enumerate(ev["args"]):
+            if n > 0:
+                d += ", "
+            if arg["type"] in ["int", "uint", "fixed", "fd"]:
+                d += "int "
+            elif arg["type"] == "string":
+                d += "String "
+            elif arg["type"] in ["object", "new_id"]:
+                d += "WLProxy "
+            elif arg["type"] == "array":
+                d += "int " #TODO: Placeholder, arrays unimplemented
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+            d += arg["name"]
+        d += ");\n"
+    if len(iface["events"]) > 0:
+        d += "\t\t\n"
+    d += "\t}\n"
+    d += "\t\n"
+    d += "\tstatic {\n"
+    d += '\t\tSystem.loadLibrary("jwayland");\n'
     d += "\t}\n"
     d += "\t\n"
     d += "}\n"
