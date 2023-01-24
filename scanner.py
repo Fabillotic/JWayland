@@ -291,10 +291,11 @@ def make_c_glue(iface):
 
     d += 'int ' + dispatcher + '(const void *implementation, void *target, uint32_t opcode, const struct wl_message *msg, union wl_argument *args) {\n'
     d += '\tstruct wl_proxy *proxy = (struct wl_proxy*) target;\n'
+    d += '\tvoid* user_data = wl_proxy_get_user_data(proxy);\n'
     d += '\tJNIEnv *env = *(JNIEnv**) user_data;\n'
     d += '\tjobject listener = (jobject) implementation;\n'
     d += '\n'
-    d += '\tjclass listener_class = (*env)->FindClass("dev/fabillo/jwayland/protocol/' + cname + '$' + lname + '");\n'
+    d += '\tjclass listener_class = (*env)->FindClass(env, "dev/fabillo/jwayland/protocol/' + cname + '$' + lname + '");\n'
 
     for ev in iface["events"]:
         d += '\tjmethodID mListener_' + ev["name"] + ' = '
@@ -333,7 +334,7 @@ def make_c_glue(iface):
     d += '\tstruct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);\n'
     d += '\tJNIEnv **data = malloc(sizeof(JNIEnv*));\n'
     d += '\t*data = env;\n'
-    d += '\twl_proxy_add_dispatcher(proxy, '
+    d += '\twl_proxy_add_dispatcher(wproxy, '
     d += dispatcher
     d += ', listener_ref, data);\n'
     d += "}\n"
