@@ -295,6 +295,29 @@ def make_c_glue(iface):
     d += '\tjobject listener = (jobject) implementation;\n'
     d += '\n'
     d += '\tjclass listener_class = (*env)->FindClass("dev/fabillo/jwayland/protocol/' + cname + '$' + lname + '");\n'
+
+    for ev in iface["events"]:
+        d += '\tjmethodID mListener_' + ev["name"] + ' = '
+        d += '(*env)->GetMethodID(env, listener_class, "' + ev["name"] + '", '
+        d += '"' + ev["signature"] + '");\n'
+
+    d += '\n'
+    d += '\tjvalue *values;\n'
+    d += '\tchar *sig;\n'
+    d += '\n'
+    d += '\targuments_to_java(env, msg, args, &sig, &values);\n'
+
+    d += '\tswitch(opcode) {\n'
+
+    for n, ev in enumerate(iface["events"]):
+        d += f'\t\tcase {n}: (*env)->CallVoidMethodA(env, listener, mListener_{ev["name"]}, values); break;\n'
+
+    d += '\t\tdefault: break;\n'
+    d += '\t}\n'
+
+    d += '\n'
+    d += '\treturn 0;\n'
+
     d += '}\n'
     d += '\n'
 
