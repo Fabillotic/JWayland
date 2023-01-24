@@ -143,6 +143,7 @@ def make_java_proxy(iface):
     for n, ev in enumerate(iface["events"]):
         if n > 0:
             d += "\t\t\n"
+        sig = "("
         d += "\t\t@WLEvent\n"
         d += f"\t\tpublic void {ev['name']}("
         for n, arg in enumerate(ev["args"]):
@@ -150,17 +151,23 @@ def make_java_proxy(iface):
                 d += ", "
             if arg["type"] in ["int", "uint", "fixed", "fd"]:
                 d += "int "
+                sig += "I"
             elif arg["type"] == "string":
                 d += "String "
+                sig += "Ljava/lang/String;"
             elif arg["type"] in ["object", "new_id"]:
                 d += "WLProxy "
+                sig += "Ldev/fabillo/jwayland/WLProxy;"
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
+                sig += "J"
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
             d += sanitize_name(arg["name"])
         d += ");\n"
+        sig += ")V"
+        ev["signature"] = sig
     if len(iface["events"]) > 0:
         d += "\t\t\n"
     d += "\t}\n"
