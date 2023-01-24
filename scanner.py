@@ -23,9 +23,9 @@ def main():
         #f = open(i["camel_name"] + ".java.test", "w")
         #f.write(j)
         #f.close()
-        f = open(i["name"] + ".c.test", "w")
-        f.write(c)
-        f.close()
+        #f = open(i["name"] + ".c.test", "w")
+        #f.write(c)
+        #f.close()
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
@@ -277,6 +277,36 @@ def make_c_glue(iface):
                     return
             d += ');\n';
         d += "}\n"
+    d += "\n"
+
+    dispatcher = iface["name"] + "_dispatcher"
+    lname = cname + "Listener"
+
+    d += 'int ' + dispatcher + '(const void *implementation, void *target, uint32_t opcode, const struct wl_message *msg, union wl_argument *args) {\n'
+    d += '\tstruct wl_proxy *proxy = (struct wl_proxy*) target;\n'
+    d += '\tJNIEnv *env = *(JNIEnv**) user_data;\n'
+    d += '\tjobject listener = (jobject) implementation;\n'
+    d += '\n'
+    d += '\tjclass listener_class = (*env)->FindClass("dev/fabillo/jwayland/protocol/' + cname + '$' + lname + '");\n'
+    d += '}\n'
+    d += '\n'
+
+    d += 'JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_protocol_'
+    d += cname
+    d += '_addListener(JNIEnv *env, jobject obj, jobject listener) {\n'
+    d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLProxy");\n'
+    d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
+    d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
+    d += "\n"
+    d += "\tjobject listener_ref = (*env)->NewGlobalRef(env, listener);\n"
+    d += "\n"
+    d += '\tstruct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);\n'
+    d += '\tJNIEnv **data = malloc(sizeof(JNIEnv*));\n'
+    d += '\t*data = env;\n'
+    d += '\twl_proxy_add_dispatcher(proxy, '
+    d += dispatcher
+    d += ', listener_ref, data);\n'
+    d += "}\n"
     return d
 
 def sanitize_name(name):
