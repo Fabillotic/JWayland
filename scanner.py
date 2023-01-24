@@ -54,7 +54,18 @@ def parse_interface(interface):
                 if arg == arg2 and n != n2:
                     print("ERROR: duplicate argument names!!!")
                     return
-        print(t)
+        r["requests"].append(t)
+        print(f"request: {t}")
+    r["events"] = []
+    for ev in interface.findall("event"):
+        t = {"name": ev.attrib["name"], "args": []}
+        for arg in ev.findall("arg"):
+            a = {"name": arg.attrib["name"], "type": arg.attrib["type"]}
+            if "interface" in arg.attrib:
+                a["interface"] = arg.attrib["interface"]
+            t["args"].append(a)
+        r["events"].append(t)
+        print(f"event: {t}")
 
 if __name__ == "__main__":
     main()
