@@ -217,18 +217,20 @@ def make_c_glue(iface):
         d += '\n'
         d += '\tstruct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);\n'
         if req["return_proxy"]:
-            d += '\tconst struct wl_interface *inf = get_interface_by_name((*env)->GetStringUTFChars(env, '
+            d += '\tconst struct wl_interface *inf = get_interface_by_name('
             if req["sun"]:
+                d += '(*env)->GetStringUTFChars(env, '
                 d += 'interface_name' #argument for interface name
+                d += ', NULL)'
             else:
                 for n, arg in enumerate(req["args"]):
                     if arg["type"] == "new_id":
-                        d += arg["interface"]
+                        d += '"' + arg["interface"] + '"'
                         break
                 else:
                     print("ERROR: Failed to find new_id argument interface name!")
                     return
-            d += ', NULL));\n'
+            d += ');\n'
             d += '\tif(!inf) return NULL;\n'
             d += '\tstruct wl_proxy *nproxy = wl_proxy_marshal_constructor(wproxy, '
             d += str(opcode)
