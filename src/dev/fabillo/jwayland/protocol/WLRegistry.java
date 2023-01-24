@@ -9,16 +9,16 @@ public class WLRegistry extends WLProxy {
 	
 	public static WLRegistry fromProxy(WLProxy proxy) {
 		if(proxy == null) return null;
-		WLRegistry registry = new WLRegistry();
-		registry.native_ptr = proxy.native_ptr;
-		return registry;
+		WLRegistry type = new WLRegistry();
+		type.native_ptr = proxy.native_ptr;
+		return type;
 	}
 	
 	@ProxyListener
 	public native void addListener(WLRegistryListener listener);
 	
 	@WLRequest
-	public native WLProxy bind(int name, String iface, int version);
+	public native WLProxy bind(int name, String interface_name, int interface_version);
 	
 	public static interface WLRegistryListener {
 		

@@ -9,16 +9,16 @@ public class WLBuffer extends WLProxy {
 	
 	public static WLBuffer fromProxy(WLProxy proxy) {
 		if(proxy == null) return null;
-		WLBuffer buffer = new WLBuffer();
-		buffer.native_ptr = proxy.native_ptr;
-		return buffer;
+		WLBuffer type = new WLBuffer();
+		type.native_ptr = proxy.native_ptr;
+		return type;
 	}
-	
-	@WLRequest
-	public native void destroy();
 	
 	@ProxyListener
 	public native void addListener(WLBufferListener listener);
+	
+	@WLRequest
+	public native void destroy();
 	
 	public static interface WLBufferListener {
 		
@@ -30,5 +30,5 @@ public class WLBuffer extends WLProxy {
 	static {
 		System.loadLibrary("jwayland");
 	}
-
+	
 }

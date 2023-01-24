@@ -16,6 +16,9 @@ def main():
         if j == None:
             return
         print(j)
+        #f = open(i["camel_name"] + ".java.test", "w")
+        #f.write(j)
+        #f.close()
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
@@ -124,7 +127,7 @@ def make_java_proxy(iface):
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
-            d += arg["name"]
+            d += sanitize_name(arg["name"])
         d += ");\n"
     if len(iface["requests"]) > 0:
         d += "\t\n"
@@ -149,7 +152,7 @@ def make_java_proxy(iface):
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
-            d += arg["name"]
+            d += sanitize_name(arg["name"])
         d += ");\n"
     if len(iface["events"]) > 0:
         d += "\t\t\n"
@@ -161,6 +164,11 @@ def make_java_proxy(iface):
     d += "\t\n"
     d += "}\n"
     return d
+
+def sanitize_name(name):
+    if name == "interface":
+        return "iface"
+    return name
 
 if __name__ == "__main__":
     main()

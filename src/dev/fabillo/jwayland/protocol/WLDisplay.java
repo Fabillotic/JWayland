@@ -9,9 +9,9 @@ public class WLDisplay extends WLProxy {
 	
 	public static WLDisplay fromProxy(WLProxy proxy) {
 		if(proxy == null) return null;
-		WLDisplay display = new WLDisplay();
-		display.native_ptr = proxy.native_ptr;
-		return display;
+		WLDisplay type = new WLDisplay();
+		type.native_ptr = proxy.native_ptr;
+		return type;
 	}
 	
 	@ProxyListener
@@ -26,7 +26,7 @@ public class WLDisplay extends WLProxy {
 	public static interface WLDisplayListener {
 		
 		@WLEvent
-		public void error(WLProxy object, int code, String message);
+		public void error(WLProxy object_id, int code, String message);
 		
 		@WLEvent
 		public void delete_id(int id);
