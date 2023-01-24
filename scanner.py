@@ -1,11 +1,17 @@
-from sys import argv
+import argparse
+import pathlib
 import xml.etree.ElementTree as ET
 
 def main():
-    if not len(argv) > 1:
-        print("scanner.py: [xml file]")
-        exit()
-    tree = ET.parse(argv[1])
+    parser = argparse.ArgumentParser(prog="scanner.py", description="Generate all the necessary Java and C glue code for JWayland")
+    parser.add_argument("xmlfile", type=pathlib.Path)
+    arg = parser.parse_args()
+
+    if not (arg.xmlfile.exists() and arg.xmlfile.is_file()):
+        print("Invalid file!\n")
+        return
+
+    tree = ET.parse(arg.xmlfile)
     root = tree.getroot()
     for i in root.findall("interface"):
         #if i.attrib["name"] == "wl_buffer":
@@ -15,11 +21,11 @@ def main():
         j = make_java_proxy(i)
         if j == None:
             return
-        print(j)
+        #print(j)
         c = make_c_glue(i)
         if c == None:
             return
-        print(c)
+        #print(c)
         #f = open(i["camel_name"] + ".java.test", "w")
         #f.write(j)
         #f.close()
@@ -29,7 +35,7 @@ def main():
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
-    print(f"\n{r['name']}")
+    print(f"{r['name']}...")
     r["camel_name"] = ""
     first_underscore = False
     for n, c in enumerate(r["name"]):
@@ -63,7 +69,6 @@ def parse_interface(interface):
                 #A new_id without a specified interface should be prefixed with a string and uint specifing the name and type of the interface
                 #That's why I call it a 'sun' for the wl_message signature it generates
                 if not "interface" in arg:
-                    print("SUN!")
                     t["args"] = t["args"][:n] + [{"name": "interface_name", "type": "string"}, {"name": "interface_version", "type": "uint"}] + t["args"][n:]
                     t["sun"] = True
         #Check for duplicate names
@@ -73,7 +78,6 @@ def parse_interface(interface):
                     print("ERROR: duplicate argument names!!!")
                     return
         r["requests"].append(t)
-        print(f"request: {t}")
     r["events"] = []
     for ev in interface.findall("event"):
         t = {"name": ev.attrib["name"], "args": []}
@@ -83,7 +87,6 @@ def parse_interface(interface):
                 a["interface"] = arg.attrib["interface"]
             t["args"].append(a)
         r["events"].append(t)
-        print(f"event: {t}")
     return r
 
 def make_java_proxy(iface):
