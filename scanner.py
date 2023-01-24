@@ -23,6 +23,9 @@ def main():
         #f = open(i["camel_name"] + ".java.test", "w")
         #f.write(j)
         #f.close()
+        f = open(i["name"] + ".c.test", "w")
+        f.write(c)
+        f.close()
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
@@ -127,7 +130,7 @@ def make_java_proxy(iface):
             elif arg["type"] == "object":
                 d += "WLProxy "
             elif arg["type"] == "array":
-                d += "int " #TODO: Placeholder, arrays unimplemented
+                d += "long " #TODO: Placeholder, arrays unimplemented
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -152,7 +155,7 @@ def make_java_proxy(iface):
             elif arg["type"] in ["object", "new_id"]:
                 d += "WLProxy "
             elif arg["type"] == "array":
-                d += "int " #TODO: Placeholder, arrays unimplemented
+                d += "long " #TODO: Placeholder, arrays unimplemented
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -179,7 +182,7 @@ def make_c_glue(iface):
     d += '#include "interfaces.h"\n'
     d += '#include "util.h"\n'
     d += "\n"
-    for n, req in enumerate(iface["requests"]):
+    for opcode, req in enumerate(iface["requests"]):
         d += "JNIEXPORT "
         d += "jobject " if req["return_proxy"] else "void "
         d += "JNICALL "
@@ -199,18 +202,48 @@ def make_c_glue(iface):
             elif arg["type"] == "object":
                 d += "jobject "
             elif arg["type"] == "array":
-                d += "jint " #TODO: Placeholder, arrays unimplemented
+                d += "jlong " #TODO: Placeholder, arrays unimplemented
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
             d += sanitize_name(arg["name"])
-        d += ") {"
+        d += ") {\n"
+        d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLProxy");\n'
+        d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
+        if req["return_proxy"]:
+            d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
+        d += '\n'
+        d += '\tstruct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);\n'
+        if req["return_proxy"]:
+            d += '\treturn NULL;'
+        else:
+            d += '\twl_proxy_marshal(wproxy, '
+            d += str(opcode)
+            for arg in req["args"]:
+                d += ', '
+                if arg["type"] in ["int", "fixed", "fd"]:
+                    d += '(int32_t) ' + sanitize_name(arg["name"])
+                elif arg["type"] == "uint":
+                    d += '(uint32_t) ' + sanitize_name(arg["name"])
+                elif arg["type"] == "string":
+                    d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
+                elif arg["type"] == "object":
+                    d += '(struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr)'
+                elif arg["type"] == "array":
+                    d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
+                else:
+                    print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                    return
+            d += ');';
+        d += '\n'
         d += "}\n"
     return d
 
 def sanitize_name(name):
     if name == "interface":
         return "iface"
+    elif name == "class":
+        return "clazz"
     return name
 
 if __name__ == "__main__":
