@@ -9,7 +9,13 @@ def main():
     root = tree.getroot()
     for i in root.findall("interface"):
         #if i.attrib["name"] == "wl_buffer":
-        parse_interface(i)
+        i = parse_interface(i)
+        if i == None:
+            return
+        j = make_java_proxy(i)
+        if j == None:
+            return
+        print(j)
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
@@ -66,6 +72,66 @@ def parse_interface(interface):
             t["args"].append(a)
         r["events"].append(t)
         print(f"event: {t}")
+    return r
+
+def make_java_proxy(iface):
+    cname = iface["camel_name"]
+    lname = cname + "Listener"
+    d = ""
+    d += "package dev.fabillo.jwayland.protocol;\n"
+    d += "\n"
+    d += "import dev.fabillo.jwayland.WLProxy;\n"
+    d += "import dev.fabillo.jwayland.annotation.ProxyListener;\n"
+    d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
+    d += "import dev.fabillo.jwayland.annotation.WLRequest;\n"
+    d += "\n"
+    d += f"public class {cname} extends WLProxy" + " {\n"
+    d += "\t\n"
+    d += f"\tpublic static {cname} fromProxy(WLProxy proxy)" + " {\n"
+    d += "\t\tif(proxy == null) return null;\n"
+    d += f"\t\t{cname} type = new {cname}();\n"
+    d += "\t\ttype.native_ptr = proxy.native_ptr;\n"
+    d += "\t\treturn type;\n"
+    d += "\t}\n"
+    d += "\t\n"
+    d += "\t@ProxyListener\n"
+    d += f"\tpublic native void addListener({lname} listener);\n"
+    d += "\t\n"
+    for n, req in enumerate(iface["requests"]):
+        if n > 0:
+            d += "\t\n"
+        d += "\t@WLRequest\n"
+        d += "\tpublic native "
+        d += "WLProxy " if req["return_proxy"] else "void "
+        d += req["name"]
+        d += "("
+        for n, arg in enumerate(req["args"]):
+            if arg["type"] == "new_id":
+                continue
+            #Check if a comma needs to be added, new_id at the start may cause issues
+            if n > (1 if req["args"][0]["type"] == "new_id" else 0):
+                d += ", "
+            if arg["type"] in ["int", "uint", "fixed", "fd"]:
+                d += "int "
+            elif arg["type"] == "string":
+                d += "String "
+            elif arg["type"] == "object":
+                d += "WLProxy "
+            elif arg["type"] == "array":
+                d += "int " #TODO: Placeholder, arrays unimplemented
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+            d += arg["name"]
+        d += ");\n"
+    if len(iface["requests"]) > 0:
+        d += "\t\n"
+    d += f"\tpublic static interface {lname}" + " {\n"
+    d += "\t\t\n"
+    d += "\t}\n"
+    d += "\t\n"
+    d += "}\n"
+    return d
 
 if __name__ == "__main__":
     main()
