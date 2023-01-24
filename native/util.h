@@ -15,13 +15,9 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 	sig = malloc(200);
 	sig[0] = '\0';
 	for(i = 0; (c = msg->signature[i]) != '\0'; i++) {
-		printf("Character: %c\n", c);
-		fflush(stdout);
 		if(c >= '0' && c <= '9') continue;
 		else if(c == '?') continue;
 		else if(c == 'i' || c == 'u' || c == 'h' || c == 'f' || c == 'n') {
-			printf("FOUND NUMBER!!\n");
-			fflush(stdout);
 			strcat(sig, "I");
 			n++;
 		}

@@ -1,5 +1,5 @@
 BIN = libjwayland.so
-OBJ = clientdisplay.o interfaces.o wldisplay.o wlcallback.o wlregistry.o wp_single_pixel_buffer_manager_v1.o wlbuffer.o
+OBJ = clientdisplay.o interfaces.o wl_display.o wl_callback.o wl_registry.o wp_single_pixel_buffer_manager_v1.o wl_buffer.o
 
 ifeq ($(JAVA_HOME),)
 JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
@@ -16,19 +16,19 @@ clientdisplay.o: clientdisplay.c
 interfaces.o: interfaces.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
-wldisplay.o: wldisplay.c util.h
+wl_display.o: wl_display.c util.h
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
-wlcallback.o: wlcallback.c util.h
+wl_callback.o: wl_callback.c util.h
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
-wlregistry.o: wlregistry.c util.h
+wl_registry.o: wl_registry.c util.h
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
 wp_single_pixel_buffer_manager_v1.o: wp_single_pixel_buffer_manager_v1.c util.h
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
-wlbuffer.o: wlbuffer.c util.h
+wl_buffer.o: wl_buffer.c util.h
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
 .PHONY: all

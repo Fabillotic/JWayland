@@ -17,7 +17,7 @@ struct wl_interface *interfaces[] = {
 	&wl_buffer_interface
 };
 
-struct wl_interface *get_interface_by_name(char *name) {
+struct wl_interface *get_interface_by_name(const char *name) {
 	int i;
 
 	for(i = 0; i < sizeof(interfaces) / sizeof(intptr_t); i++) {

@@ -15,9 +15,6 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1name(JNI
 	const char *name_str;
 	struct wl_display *display;
 
-	printf("CONNECT!\n");
-	fflush(stdout);
-
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(display) {
 		printf("DISPLAY ALREADY CONNECTED!\n");
@@ -32,16 +29,11 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1name(JNI
 
 	if(name) (*env)->ReleaseStringUTFChars(env, name, name_str);
 
-	printf("display: %p\n", display);
-	fflush(stdout);
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1fd(JNIEnv *env, jobject obj, jint fd) {
 	struct wl_display *display;
-
-	printf("CONNECT!\n");
-	fflush(stdout);
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(display) {
@@ -58,9 +50,6 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1fd(JNIEn
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_disconnect(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
-	printf("DISCONNECT!\n");
-	fflush(stdout);
-
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
 		printf("DISPLAY IS NOT CONNECTED!\n");
@@ -76,9 +65,6 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_disconnect(JNIEnv
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_dispatch(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
-	printf("DISPATCH!\n");
-	fflush(stdout);
-
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
 		printf("DISPLAY IS NOT CONNECTED!\n");
@@ -92,9 +78,6 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_dispatch(JNIEnv *
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_flush(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
-	printf("FLUSH!\n");
-	fflush(stdout);
-
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
 		printf("DISPLAY IS NOT CONNECTED!\n");
@@ -107,9 +90,6 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_flush(JNIEnv *env
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_roundtrip(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
-
-	printf("ROUNDTRIP!\n");
-	fflush(stdout);
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
