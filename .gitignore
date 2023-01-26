@@ -2,4 +2,6 @@
 .project
 .settings/
 bin/
+classes/
+jwayland.jar
 *.xml

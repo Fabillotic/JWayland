@@ -1,5 +1,7 @@
-package dev.fabillo.jwayland;
+package dev.fabillo.jwayland.examples;
 
+import dev.fabillo.jwayland.ClientDisplay;
+import dev.fabillo.jwayland.WLProxy;
 import dev.fabillo.jwayland.protocol.WLBuffer;
 import dev.fabillo.jwayland.protocol.WLCallback;
 import dev.fabillo.jwayland.protocol.WLCallback.WLCallbackListener;
@@ -8,7 +10,7 @@ import dev.fabillo.jwayland.protocol.WLRegistry;
 import dev.fabillo.jwayland.protocol.WLRegistry.WLRegistryListener;
 import dev.fabillo.jwayland.protocol.WPSinglePixelBufferManagerV1;
 
-public class JWayland {
+public class JWaylandExample {
 	
 	private static WPSinglePixelBufferManagerV1 pix;
 
