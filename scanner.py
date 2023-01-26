@@ -4,34 +4,66 @@ import xml.etree.ElementTree as ET
 
 def main():
     parser = argparse.ArgumentParser(prog="scanner.py", description="Generate all the necessary Java and C glue code for JWayland")
+    parser.add_argument("type", choices=["jni-code", "java-code", "interface-header", "interfaces"])
     parser.add_argument("xmlfile", type=pathlib.Path)
+    parser.add_argument("directory", type=pathlib.Path)
     arg = parser.parse_args()
 
     if not (arg.xmlfile.exists() and arg.xmlfile.is_file()):
         print("Invalid file!\n")
         return
 
+    if not (arg.directory.exists() and arg.directory.is_dir()):
+        print("Invalid directory!\n")
+        return
+
     tree = ET.parse(arg.xmlfile)
     root = tree.getroot()
-    for i in root.findall("interface"):
-        #if i.attrib["name"] == "wl_buffer":
-        i = parse_interface(i)
-        if i == None:
-            return
-        j = make_java_proxy(i)
-        if j == None:
-            return
-        #print(j)
-        c = make_c_glue(i)
-        if c == None:
-            return
-        #print(c)
-        #f = open(i["camel_name"] + ".java.test", "w")
-        #f.write(j)
-        #f.close()
-        #f = open(i["name"] + ".c.test", "w")
-        #f.write(c)
-        #f.close()
+    if arg.type == "java-code":
+        for e in root.findall("interface"):
+            i = parse_interface(e)
+            if i == None:
+                return
+            j = make_java_proxy(i)
+            if j == None:
+                return
+            p = pathlib.Path(arg.directory, i['camel_name'] + ".java")
+            f = open(p, "w")
+            f.write(j)
+            f.close()
+    elif arg.type == "jni-code":
+        for e in root.findall("interface"):
+            i = parse_interface(e)
+            if i == None:
+                return
+            j = make_java_proxy(i) #Java code signature is necessary for c code
+            if j == None:
+                return
+            c = make_c_glue(i)
+            if c == None:
+                return
+            p = pathlib.Path(arg.directory, i['name'] + ".c")
+            f = open(p, "w")
+            f.write(c)
+            f.close()
+    elif arg.type == "interface-header":
+        i = make_interface_header()
+        p = pathlib.Path(arg.directory, "interfaces.h")
+        f = open(p, "w")
+        f.write(c)
+        f.close()
+    elif arg.type == "interfaces":
+        interfaces = []
+        for e in root.findall("interface"):
+            i = parse_interface(e)
+            interfaces.append(i)
+        s = make_interface_specs(interfaces)
+        p = pathlib.Path(arg.directory, "interfaces.c")
+        f = open(p, "w")
+        f.write(s)
+        f.close()
+    else:
+        print("Invalid argument: '" + arg.type + "'!")
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
@@ -47,6 +79,7 @@ def parse_interface(interface):
                 r["camel_name"] += c.upper()
             else:
                 r["camel_name"] += c
+    r["version"] = interface.attrib["version"]
     r["requests"] = []
     for req in interface.findall("request"):
         t = {"name": req.attrib["name"], "args": []}
@@ -341,6 +374,143 @@ def make_c_glue(iface):
     d += dispatcher
     d += ', listener_ref, data);\n'
     d += "}\n"
+    return d
+
+def make_interface_header():
+    return "extern struct wl_interface *interfaces[];\nstruct wl_interface *get_interface_by_name(const char*name);\n"
+
+def make_interface_specs(interfaces):
+    d = ""
+    d += '#include <stdio.h>\n'
+    d += '#include <string.h>\n'
+    d += '#include <wayland-client-core.h>\n'
+    d += '#include "interfaces.h"\n'
+    d += '\n'
+
+    for iface in interfaces:
+        d += 'struct wl_interface ' + iface["name"] + '_interface;\n'
+    d += '\n'
+
+    d += 'struct wl_interface *interfaces[] = {\n'
+    for iface in interfaces:
+        d += '\t&' + iface["name"] + '_interface,\n'
+    d += '};\n'
+
+    d += '\n'
+
+    d += 'struct wl_interface *get_interface_by_name(const char *name) {\n'
+    d += '\tint i;\n'
+    d += '\n'
+    d += '\tfor(i = 0; i < sizeof(interfaces) / sizeof(intptr_t); i++) {\n'
+    d += '\t\tif(!strcmp(interfaces[i]->name, name)) {\n'
+    d += '\t\t\treturn interfaces[i];\n'
+    d += '\t\t}\n'
+    d += '\t}\n'
+    d += '\treturn NULL;\n'
+    d += '}\n'
+
+    for iface in interfaces:
+        d += make_interface_definition(iface)
+
+    return d
+
+def make_interface_definition(iface):
+    d = "\n\n"
+
+    d += 'struct wl_message ' + iface["name"] + '_requests[] = {\n'
+    for n, req in enumerate(iface["requests"]):
+        d += '\t{"' + req["name"] + '", "'
+        for arg in req["args"]:
+            if arg["type"] == "int":
+                d += 'i'
+            elif arg["type"] == "uint":
+                d += 'u'
+            elif arg["type"] == "fixed":
+                d += 'f'
+            elif arg["type"] == "string":
+                d += 's'
+            elif arg["type"] == "object":
+                d += 'o'
+            elif arg["type"] == "new_id":
+                d += 'n'
+            elif arg["type"] == "array":
+                d += 'a'
+            elif arg["type"] == "fd":
+                d += 'h'
+            else:
+                print(f'ERROR! Unknown argument type: "{arg["type"]}"')
+                return
+        d += '", (struct wl_interface*[]) {'
+        for n2, arg in enumerate(req["args"]):
+            if n2 > 0:
+                d += ', '
+            if arg["type"] in ["int", "uint", "fixed", "string", "array", "fd"]:
+                d += 'NULL'
+            elif arg["type"] in ["object", "new_id"]:
+                if not "interface" in arg:
+                    d += 'NULL'
+                else:
+                    d += '&' + arg["interface"] + '_interface'
+            else:
+                print(f'ERROR! Unknown argument type: "{arg["type"]}"')
+                return
+        d += '}}'
+        if n < len(iface["requests"]) - 1:
+            d += ','
+        d += '\n'
+    d += '};\n'
+    d += '\n'
+
+    d += 'struct wl_message ' + iface["name"] + '_events[] = {\n'
+    for n, ev in enumerate(iface["events"]):
+        d += '\t{"' + ev["name"] + '", "'
+        for arg in ev["args"]:
+            if arg["type"] == "int":
+                d += 'i'
+            elif arg["type"] == "uint":
+                d += 'u'
+            elif arg["type"] == "fixed":
+                d += 'f'
+            elif arg["type"] == "string":
+                d += 's'
+            elif arg["type"] == "object":
+                d += 'o'
+            elif arg["type"] == "new_id":
+                d += 'n'
+            elif arg["type"] == "array":
+                d += 'a'
+            elif arg["type"] == "fd":
+                d += 'h'
+            else:
+                print(f'ERROR! Unknown argument type: "{arg["type"]}"')
+                return
+        d += '", (struct wl_interface*[]) {'
+        for n2, arg in enumerate(ev["args"]):
+            if n2 > 0:
+                d += ', '
+            if arg["type"] in ["int", "uint", "fixed", "string", "array", "fd"]:
+                d += 'NULL'
+            elif arg["type"] in ["object", "new_id"]:
+                if not "interface" in arg:
+                    d += 'NULL'
+                else:
+                    d += '&' + arg["interface"] + '_interface'
+            else:
+                print(f'ERROR! Unknown argument type: "{arg["type"]}"')
+                return
+        d += '}}'
+        if n < len(iface["events"]) - 1:
+            d += ','
+        d += '\n'
+    d += '};\n'
+    d += '\n'
+
+    d += 'struct wl_interface ' + iface["name"] + '_interface = {\n'
+    d += '\t"' + iface["name"] + '", ' + str(iface["version"]) + ',\n'
+    d += '\t' + str(len(iface["requests"])) + ', ' + iface["name"] + '_requests,\n'
+    d += '\t' + str(len(iface["events"])) + ', ' + iface["name"] + '_events\n'
+    d += '};\n'
+
     return d
 
 def sanitize_name(name):

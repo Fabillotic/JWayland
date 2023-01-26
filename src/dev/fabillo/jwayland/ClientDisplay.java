@@ -4,7 +4,7 @@ import dev.fabillo.jwayland.protocol.WLDisplay;
 
 public class ClientDisplay {
 	
-	protected long native_ptr = 0;
+	public long native_ptr = 0;
 	
 	private ClientDisplay() {
 	}

@@ -1,34 +1,24 @@
 BIN = libjwayland.so
-OBJ = clientdisplay.o interfaces.o wl_display.o wl_callback.o wl_registry.o wp_single_pixel_buffer_manager_v1.o wl_buffer.o
+OBJ = clientdisplay.o serverdisplay.o
 
 ifeq ($(JAVA_HOME),)
 JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
 endif
 
+include protocol/protocol.mk
+
 all: $(BIN)
 
-$(BIN): $(OBJ)
-	$(CC) -fPIC -shared -o $(BIN) $(OBJ) -lwayland-client
+$(BIN): $(OBJ) $(PROTOCOL_OBJ)
+	$(CC) -fPIC -shared -o $(BIN) $(OBJ) $(PROTOCOL_OBJ) -lwayland-client
 
 clientdisplay.o: clientdisplay.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
-interfaces.o: interfaces.c
+serverdisplay.o: serverdisplay.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
 
-wl_display.o: wl_display.c util.h
-	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
+clean:
+	rm -f $(BIN) $(OBJ)
 
-wl_callback.o: wl_callback.c util.h
-	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
-
-wl_registry.o: wl_registry.c util.h
-	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
-
-wp_single_pixel_buffer_manager_v1.o: wp_single_pixel_buffer_manager_v1.c util.h
-	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
-
-wl_buffer.o: wl_buffer.c util.h
-	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -o $@ $<
-
-.PHONY: all
+.PHONY: all clean
