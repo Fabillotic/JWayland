@@ -5,65 +5,69 @@ import xml.etree.ElementTree as ET
 def main():
     parser = argparse.ArgumentParser(prog="scanner.py", description="Generate all the necessary Java and C glue code for JWayland")
     parser.add_argument("type", choices=["jni-code", "java-code", "interface-header", "interfaces"])
-    parser.add_argument("xmlfile", type=pathlib.Path)
     parser.add_argument("directory", type=pathlib.Path)
+    parser.add_argument("xmlfile", type=pathlib.Path, nargs="+")
     arg = parser.parse_args()
 
-    if not (arg.xmlfile.exists() and arg.xmlfile.is_file()):
-        print("Invalid file!\n")
-        return
+    for x in arg.xmlfile:
+        if not (x.exists() and x.is_file()):
+            print("Invalid file: '" + str(x) + "'!")
+            return
 
     if not (arg.directory.exists() and arg.directory.is_dir()):
         print("Invalid directory!\n")
         return
 
-    tree = ET.parse(arg.xmlfile)
-    root = tree.getroot()
-    if arg.type == "java-code":
-        for e in root.findall("interface"):
-            i = parse_interface(e)
-            if i == None:
-                return
-            j = make_java_proxy(i)
-            if j == None:
-                return
-            p = pathlib.Path(arg.directory, i['camel_name'] + ".java")
+    interfaces = []
+    for x in arg.xmlfile:
+        tree = ET.parse(x)
+        root = tree.getroot()
+        if arg.type == "java-code":
+            for e in root.findall("interface"):
+                i = parse_interface(e)
+                if i == None:
+                    return
+                j = make_java_proxy(i)
+                if j == None:
+                    return
+                p = pathlib.Path(arg.directory, i['camel_name'] + ".java")
+                f = open(p, "w")
+                f.write(j)
+                f.close()
+        elif arg.type == "jni-code":
+            for e in root.findall("interface"):
+                i = parse_interface(e)
+                if i == None:
+                    return
+                j = make_java_proxy(i) #Java code signature is necessary for c code
+                if j == None:
+                    return
+                c = make_c_glue(i)
+                if c == None:
+                    return
+                p = pathlib.Path(arg.directory, i['name'] + ".c")
+                f = open(p, "w")
+                f.write(c)
+                f.close()
+        elif arg.type == "interface-header":
+            i = make_interface_header()
+            p = pathlib.Path(arg.directory, "interfaces.h")
             f = open(p, "w")
-            f.write(j)
+            f.write(i)
             f.close()
-    elif arg.type == "jni-code":
-        for e in root.findall("interface"):
-            i = parse_interface(e)
-            if i == None:
-                return
-            j = make_java_proxy(i) #Java code signature is necessary for c code
-            if j == None:
-                return
-            c = make_c_glue(i)
-            if c == None:
-                return
-            p = pathlib.Path(arg.directory, i['name'] + ".c")
-            f = open(p, "w")
-            f.write(c)
-            f.close()
-    elif arg.type == "interface-header":
-        i = make_interface_header()
-        p = pathlib.Path(arg.directory, "interfaces.h")
-        f = open(p, "w")
-        f.write(c)
-        f.close()
-    elif arg.type == "interfaces":
-        interfaces = []
-        for e in root.findall("interface"):
-            i = parse_interface(e)
-            interfaces.append(i)
+        elif arg.type == "interfaces":
+            for e in root.findall("interface"):
+                i = parse_interface(e)
+                interfaces.append(i)
+        else:
+            print("Invalid argument: '" + arg.type + "'!")
+
+    if arg.type == "interfaces":
         s = make_interface_specs(interfaces)
         p = pathlib.Path(arg.directory, "interfaces.c")
         f = open(p, "w")
         f.write(s)
         f.close()
-    else:
-        print("Invalid argument: '" + arg.type + "'!")
 
 def parse_interface(interface):
     r = {"name": interface.attrib["name"]}
