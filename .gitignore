@@ -5,3 +5,4 @@ bin/
 classes/
 jwayland.jar
 *.xml
+!build.xml

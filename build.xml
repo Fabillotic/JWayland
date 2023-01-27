@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<project name="JWayland" default="jar">
+	<target name="compile">
+		<mkdir dir="classes"/>
+		<javac srcdir="src" destdir="classes"/>
+	</target>
+	<target name="jar" depends="compile">
+		<jar destfile="jwayland.jar">
+			<fileset dir="classes" includes="**/*.class"/>
+			<fileset dir="native">
+				<include name="libjwayland.so"/>
+			</fileset>
+		</jar>
+	</target>
+</project>
