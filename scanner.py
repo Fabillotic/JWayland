@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 def main():
     parser = argparse.ArgumentParser(prog="scanner.py", description="Generate all the necessary Java and C glue code for JWayland")
-    parser.add_argument("type", choices=["jni-code", "java-code", "interface-header", "interfaces"])
+    parser.add_argument("type", choices=["client-jni-code", "client-java-code", "server-jni-code", "server-java-code", "interface-header", "interfaces"])
     parser.add_argument("directory", type=pathlib.Path)
     parser.add_argument("xmlfile", type=pathlib.Path, nargs="+")
     arg = parser.parse_args()
@@ -22,7 +22,7 @@ def main():
     for x in arg.xmlfile:
         tree = ET.parse(x)
         root = tree.getroot()
-        if arg.type == "java-code":
+        if arg.type == "client-java-code":
             for e in root.findall("interface"):
                 i = parse_interface(e)
                 if i == None:
@@ -34,7 +34,7 @@ def main():
                 f = open(p, "w")
                 f.write(j)
                 f.close()
-        elif arg.type == "jni-code":
+        elif arg.type == "client-jni-code":
             for e in root.findall("interface"):
                 i = parse_interface(e)
                 if i == None:
@@ -42,19 +42,40 @@ def main():
                 j = make_java_proxy(i) #Java code signature is necessary for c code
                 if j == None:
                     return
-                c = make_c_glue(i)
+                c = make_c_glue_proxy(i)
                 if c == None:
                     return
                 p = pathlib.Path(arg.directory, i['name'] + ".c")
                 f = open(p, "w")
                 f.write(c)
                 f.close()
-        elif arg.type == "interface-header":
-            i = make_interface_header()
-            p = pathlib.Path(arg.directory, "interfaces.h")
-            f = open(p, "w")
-            f.write(i)
-            f.close()
+        elif arg.type == "server-java-code":
+            for e in root.findall("interface"):
+                i = parse_interface(e)
+                if i == None:
+                    return
+                j = make_java_resource(i)
+                if j == None:
+                    return
+                p = pathlib.Path(arg.directory, i['camel_name'] + "Resource.java")
+                f = open(p, "w")
+                f.write(j)
+                f.close()
+        elif arg.type == "server-jni-code":
+            for e in root.findall("interface"):
+                i = parse_interface(e)
+                if i == None:
+                    return
+                j = make_java_resource(i) #Java code signature is necessary for c code
+                if j == None:
+                    return
+                c = make_c_glue_resource(i)
+                if c == None:
+                    return
+                p = pathlib.Path(arg.directory, i['name'] + ".c")
+                f = open(p, "w")
+                f.write(c)
+                f.close()
         elif arg.type == "interfaces":
             for e in root.findall("interface"):
                 i = parse_interface(e)
@@ -221,7 +242,101 @@ def make_java_proxy(iface):
     d += "}\n"
     return d
 
-def make_c_glue(iface):
+def make_java_resource(iface):
+    cname = iface["camel_name"] + "Resource"
+    lname = cname + "Listener"
+    d = ""
+    d += "package dev.fabillo.jwayland.protocol.server;\n"
+    d += "\n"
+    d += "import dev.fabillo.jwayland.server.WLResource;\n"
+    d += "import dev.fabillo.jwayland.annotation.ResourceListener;\n"
+    d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
+    d += "import dev.fabillo.jwayland.annotation.WLRequest;\n"
+    d += "\n"
+    d += f"public class {cname} extends WLResource" + " {\n"
+    d += "\t\n"
+    d += f"\tpublic static {cname} fromResource(WLResource resource)" + " {\n"
+    d += "\t\tif(resource == null) return null;\n"
+    d += f"\t\t{cname} type = new {cname}();\n"
+    d += "\t\ttype.native_ptr = resource.native_ptr;\n"
+    d += "\t\treturn type;\n"
+    d += "\t}\n"
+    d += "\t\n"
+    d += "\t@ResourceListener\n"
+    d += f"\tpublic native void addListener({lname} listener);\n"
+    d += "\t\n"
+    for n, ev in enumerate(iface["events"]):
+        if n > 0:
+            d += "\t\n"
+        d += "\t@WLEvent\n"
+        d += "\tpublic native void "
+        d += ev["name"]
+        d += "("
+        for n, arg in enumerate(ev["args"]):
+            if n > 0:
+                d += ", "
+            if arg["type"] in ["int", "fixed", "fd", "new_id"]:
+                d += "int "
+            elif arg["type"] == "uint":
+                d += "long "
+            elif arg["type"] == "string":
+                d += "String "
+            elif arg["type"] == "object":
+                d += "WLResource "
+            elif arg["type"] == "array":
+                d += "long " #TODO: Placeholder, arrays unimplemented
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+            d += sanitize_name(arg["name"])
+        d += ");\n"
+    if len(iface["events"]) > 0:
+        d += "\t\n"
+    d += f"\tpublic static interface {lname}" + " {\n"
+    d += "\t\t\n"
+    for n, req in enumerate(iface["requests"]):
+        if n > 0:
+            d += "\t\t\n"
+        sig = "("
+        d += "\t\t@WLRequest\n"
+        d += f"\t\tpublic void {req['name']}("
+        for n, arg in enumerate(req["args"]):
+            if n > 0:
+                d += ", "
+            if arg["type"] in ["int", "uint", "fixed", "fd", "new_id"]:
+                d += "int "
+                sig += "I"
+            elif arg["type"] == "string":
+                d += "String "
+                sig += "Ljava/lang/String;"
+            elif arg["type"] == "object":
+                d += "WLResource "
+                sig += "Ldev/fabillo/jwayland/client/WLResource;"
+            elif arg["type"] == "array":
+                d += "long " #TODO: Placeholder, arrays unimplemented
+                sig += "J"
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+            d += sanitize_name(arg["name"])
+        d += ");\n"
+        sig += ")V"
+        req["signature"] = sig
+    if len(iface["events"]) > 0:
+        d += "\t\t\n"
+    d += "\t}\n"
+    d += "\t\n"
+    d += "\tstatic {\n"
+    d += '\t\tSystem.loadLibrary("jwayland");\n'
+    d += "\t}\n"
+    d += "\t\n"
+    d += "}\n"
+    return d
+
+def make_c_glue_resource(iface):
+    pass
+
+def make_c_glue_proxy(iface):
     cname = iface["camel_name"] + "Proxy"
     d = ""
     d += "#include <jni.h>\n"
@@ -383,9 +498,6 @@ def make_c_glue(iface):
     d += ', listener_ref, data);\n'
     d += "}\n"
     return d
-
-def make_interface_header():
-    return "extern struct wl_interface *interfaces[];\nstruct wl_interface *get_interface_by_name(const char*name);\n"
 
 def make_interface_specs(interfaces):
     d = ""

@@ -1,7 +1,9 @@
 #include <jni.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <wayland-server-core.h>
+#include "interfaces.h"
 
 jclass ServerDisplay_class;
 jfieldID ServerDisplay_native_ptr;
@@ -123,4 +125,38 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_destroy(JN
 	}
 
 	wl_display_destroy(display);
+}
+
+struct global_data {
+	JNIEnv *env;
+	jobject listener;
+};
+
+void global_bind(struct wl_client *client, void *data, uint32_t version, uint32_t id) {
+	struct global_data *d = (struct global_data*) data;
+	JNIEnv *env = d->env;
+
+	jclass WLGlobalBindListener_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLGlobal$WLGlobalBindListener");
+	//jmethodID WLGlobalBindListener_bind = (*env)->GetMethodID(env, WLGlobalBindListener_class, "bind", "(Ldev/fabillo/jwayland/server/WLClient;II)V");
+	jmethodID WLGlobalBindListener_bind = (*env)->GetMethodID(env, WLGlobalBindListener_class, "bind", "(JII)V");
+
+	(*env)->CallVoidMethod(env, d->listener, WLGlobalBindListener_bind, (jlong)(intptr_t)client, (jint)version, (jint)id);
+}
+
+JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1global(JNIEnv *env, jobject obj, jstring interface_name, jint version, jobject listener) {
+	struct wl_display *display;
+	struct global_data *data;
+
+	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
+	if(!display) {
+		printf("DISPLAY DOES NOT EXIST!\n");
+		fflush(stdout);
+		return NULL;
+	}
+	jobject listener_ref = (*env)->NewGlobalRef(env, listener);
+	data = malloc(sizeof(struct global_data));
+	data->env = env;
+	data->listener = listener_ref;
+	wl_global_create(display, get_interface_by_name((*env)->GetStringUTFChars(env, interface_name, NULL)), (int) version, data, global_bind);
+	return NULL;
 }

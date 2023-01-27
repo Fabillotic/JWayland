@@ -16,4 +16,12 @@ public class WLProxy {
 		return "PROXY(0x" + Long.toHexString(native_ptr) + ")";
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof WLProxy) {
+			if(((WLProxy) obj).native_ptr == native_ptr) return true;
+		}
+		return false;
+	}
+	
 }

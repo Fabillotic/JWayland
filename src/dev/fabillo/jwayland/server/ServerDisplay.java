@@ -1,5 +1,7 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
+
 public class ServerDisplay {
 	
 	public long native_ptr = 0;
@@ -27,6 +29,9 @@ public class ServerDisplay {
 	public native boolean add_socket(String name);
 	public native void destroy_clients();
 	public native void destroy();
+	
+	public native WLGlobal create_global(String interface_name, int version, WLGlobalBindListener listener);
+	public native WLResource create_resource(WLClient client, String interface_name, int version, int id);
 	
 	static {
 		System.loadLibrary("jwayland");
