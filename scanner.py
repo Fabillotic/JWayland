@@ -163,8 +163,10 @@ def make_java_proxy(iface):
             #Check if a comma needs to be added, new_id at the start may cause issues
             if n > (1 if req["args"][0]["type"] == "new_id" else 0):
                 d += ", "
-            if arg["type"] in ["int", "uint", "fixed", "fd"]:
+            if arg["type"] in ["int", "fixed", "fd"]:
                 d += "int "
+            elif arg["type"] == "uint":
+                d += "long "
             elif arg["type"] == "string":
                 d += "String "
             elif arg["type"] == "object":
@@ -244,8 +246,10 @@ def make_c_glue(iface):
             if arg["type"] == "new_id":
                 continue
             d += ", "
-            if arg["type"] in ["int", "uint", "fixed", "fd"]:
+            if arg["type"] in ["int", "fixed", "fd"]:
                 d += "jint "
+            elif arg["type"] == "uint":
+                d += "jlong "
             elif arg["type"] == "string":
                 d += "jstring "
             elif arg["type"] == "object":
