@@ -2,27 +2,27 @@ package dev.fabillo.jwayland.examples;
 
 import dev.fabillo.jwayland.client.ClientDisplay;
 import dev.fabillo.jwayland.client.WLProxy;
-import dev.fabillo.jwayland.protocol.client.WLBuffer;
-import dev.fabillo.jwayland.protocol.client.WLCallback;
-import dev.fabillo.jwayland.protocol.client.WLDisplay;
-import dev.fabillo.jwayland.protocol.client.WLRegistry;
-import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1;
-import dev.fabillo.jwayland.protocol.client.WLCallback.WLCallbackListener;
-import dev.fabillo.jwayland.protocol.client.WLRegistry.WLRegistryListener;
+import dev.fabillo.jwayland.protocol.client.WLBufferProxy;
+import dev.fabillo.jwayland.protocol.client.WLCallbackProxy;
+import dev.fabillo.jwayland.protocol.client.WLCallbackProxy.WLCallbackProxyListener;
+import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
+import dev.fabillo.jwayland.protocol.client.WLRegistryProxy;
+import dev.fabillo.jwayland.protocol.client.WLRegistryProxy.WLRegistryProxyListener;
+import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1Proxy;
 
 public class JWaylandExample {
 	
-	private static WPSinglePixelBufferManagerV1 pix;
+	private static WPSinglePixelBufferManagerV1Proxy pix;
 
 	public static void main(String[] args) {
 		ClientDisplay connection = ClientDisplay.connect(null);
 		
-		WLDisplay display = connection.getProxy();
+		WLDisplayProxy display = connection.getProxy();
 		System.out.println("display: " + display);
 		WLProxy p = display.sync();
 		System.out.println(p);
-		WLCallback c = WLCallback.fromProxy(p);
-		c.addListener(new WLCallbackListener() {
+		WLCallbackProxy c = WLCallbackProxy.fromProxy(p);
+		c.addListener(new WLCallbackProxyListener() {
 			
 			@Override
 			public void done(int callback_data) {
@@ -31,9 +31,9 @@ public class JWaylandExample {
 		});
 		System.out.println("Sync called!");
 		
-		WLRegistry registry = WLRegistry.fromProxy(display.get_registry());
+		WLRegistryProxy registry = WLRegistryProxy.fromProxy(display.get_registry());
 		System.out.println("registry: " + registry);
-		registry.addListener(new WLRegistryListener() {
+		registry.addListener(new WLRegistryProxyListener() {
 			
 			@Override
 			public void global_remove(int name) {
@@ -47,7 +47,7 @@ public class JWaylandExample {
 					WLProxy proxy = registry.bind(name, iface, version);
 					System.out.println("Global proxy: " + proxy);
 					if(proxy != null) {
-						pix = WPSinglePixelBufferManagerV1.fromProxy(proxy);
+						pix = WPSinglePixelBufferManagerV1Proxy.fromProxy(proxy);
 					}
 				}
 			}
@@ -56,7 +56,7 @@ public class JWaylandExample {
 		
 		WLProxy bprox = pix.create_u32_rgba_buffer(127, 127, 127, 127);
 		System.out.println("BUFFER CREATED: " + bprox);
-		WLBuffer buf = WLBuffer.fromProxy(bprox);
+		WLBufferProxy buf = WLBufferProxy.fromProxy(bprox);
 		System.out.println("CALLING DESTROY: " + buf);
 		buf.destroy();
 		System.out.println("Buffer created and destroyed again!");

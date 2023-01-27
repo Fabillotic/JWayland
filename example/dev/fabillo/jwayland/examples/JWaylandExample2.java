@@ -2,39 +2,39 @@ package dev.fabillo.jwayland.examples;
 
 import dev.fabillo.jwayland.client.ClientDisplay;
 import dev.fabillo.jwayland.client.SimpleShmPool;
-import dev.fabillo.jwayland.protocol.client.WLBuffer;
-import dev.fabillo.jwayland.protocol.client.WLCompositor;
-import dev.fabillo.jwayland.protocol.client.WLDisplay;
-import dev.fabillo.jwayland.protocol.client.WLRegistry;
-import dev.fabillo.jwayland.protocol.client.WLShm;
-import dev.fabillo.jwayland.protocol.client.WLShmPool;
-import dev.fabillo.jwayland.protocol.client.WLSurface;
-import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1;
-import dev.fabillo.jwayland.protocol.client.WPViewport;
-import dev.fabillo.jwayland.protocol.client.WPViewporter;
-import dev.fabillo.jwayland.protocol.client.XDGSurface;
-import dev.fabillo.jwayland.protocol.client.XDGToplevel;
-import dev.fabillo.jwayland.protocol.client.XDGWmBase;
-import dev.fabillo.jwayland.protocol.client.WLRegistry.WLRegistryListener;
-import dev.fabillo.jwayland.protocol.client.XDGSurface.XDGSurfaceListener;
-import dev.fabillo.jwayland.protocol.client.XDGToplevel.XDGToplevelListener;
-import dev.fabillo.jwayland.protocol.client.XDGWmBase.XDGWmBaseListener;
+import dev.fabillo.jwayland.protocol.client.WLBufferProxy;
+import dev.fabillo.jwayland.protocol.client.WLCompositorProxy;
+import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
+import dev.fabillo.jwayland.protocol.client.WLRegistryProxy;
+import dev.fabillo.jwayland.protocol.client.WLRegistryProxy.WLRegistryProxyListener;
+import dev.fabillo.jwayland.protocol.client.WLShmPoolProxy;
+import dev.fabillo.jwayland.protocol.client.WLShmProxy;
+import dev.fabillo.jwayland.protocol.client.WLSurfaceProxy;
+import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1Proxy;
+import dev.fabillo.jwayland.protocol.client.WPViewportProxy;
+import dev.fabillo.jwayland.protocol.client.WPViewporterProxy;
+import dev.fabillo.jwayland.protocol.client.XDGSurfaceProxy;
+import dev.fabillo.jwayland.protocol.client.XDGSurfaceProxy.XDGSurfaceProxyListener;
+import dev.fabillo.jwayland.protocol.client.XDGToplevelProxy;
+import dev.fabillo.jwayland.protocol.client.XDGToplevelProxy.XDGToplevelProxyListener;
+import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy;
+import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy.XDGWmBaseProxyListener;
 
 public class JWaylandExample2 {
 	
 	private static final boolean use_spb = false;
-	private static WLCompositor compositor;
-	private static XDGWmBase wm_base;
-	private static WPSinglePixelBufferManagerV1 spbm;
-	private static WPViewporter viewporter;
-	private static WLShm shm;
+	private static WLCompositorProxy compositor;
+	private static XDGWmBaseProxy wm_base;
+	private static WPSinglePixelBufferManagerV1Proxy spbm;
+	private static WPViewporterProxy viewporter;
+	private static WLShmProxy shm;
 	
 	public static void main(String[] args) {
 		ClientDisplay client_display = ClientDisplay.connect(null);
-		WLDisplay display = client_display.getProxy();
+		WLDisplayProxy display = client_display.getProxy();
 		
-		WLRegistry registry = WLRegistry.fromProxy(display.get_registry());
-		registry.addListener(new WLRegistryListener() {
+		WLRegistryProxy registry = WLRegistryProxy.fromProxy(display.get_registry());
+		registry.addListener(new WLRegistryProxyListener() {
 			
 			@Override
 			public void global_remove(int arg0) {
@@ -43,11 +43,11 @@ public class JWaylandExample2 {
 			
 			@Override
 			public void global(int arg0, String arg1, int arg2) {
-				if(arg1.equals("wl_compositor")) compositor = WLCompositor.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("xdg_wm_base")) wm_base = XDGWmBase.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("wp_single_pixel_buffer_manager_v1")) spbm = WPSinglePixelBufferManagerV1.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("wp_viewporter")) viewporter = WPViewporter.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("wl_shm")) shm = WLShm.fromProxy(registry.bind(arg0, arg1, arg2));
+				if(arg1.equals("wl_compositor")) compositor = WLCompositorProxy.fromProxy(registry.bind(arg0, arg1, arg2));
+				else if(arg1.equals("xdg_wm_base")) wm_base = XDGWmBaseProxy.fromProxy(registry.bind(arg0, arg1, arg2));
+				else if(arg1.equals("wp_single_pixel_buffer_manager_v1")) spbm = WPSinglePixelBufferManagerV1Proxy.fromProxy(registry.bind(arg0, arg1, arg2));
+				else if(arg1.equals("wp_viewporter")) viewporter = WPViewporterProxy.fromProxy(registry.bind(arg0, arg1, arg2));
+				else if(arg1.equals("wl_shm")) shm = WLShmProxy.fromProxy(registry.bind(arg0, arg1, arg2));
 			}
 		});
 		
@@ -77,7 +77,7 @@ public class JWaylandExample2 {
 			return;
 		}
 		
-		wm_base.addListener(new XDGWmBaseListener() {
+		wm_base.addListener(new XDGWmBaseProxyListener() {
 			
 			@Override
 			public void ping(int arg0) {
@@ -86,13 +86,13 @@ public class JWaylandExample2 {
 			}
 		});
 		
-		WLSurface surface = WLSurface.fromProxy(compositor.create_surface());
+		WLSurfaceProxy surface = WLSurfaceProxy.fromProxy(compositor.create_surface());
 		System.out.println("surface: " + surface);
-		XDGSurface window = XDGSurface.fromProxy(wm_base.get_xdg_surface(surface));
+		XDGSurfaceProxy window = XDGSurfaceProxy.fromProxy(wm_base.get_xdg_surface(surface));
 		System.out.println("window: " + window);
-		XDGToplevel toplevel = XDGToplevel.fromProxy(window.get_toplevel());
+		XDGToplevelProxy toplevel = XDGToplevelProxy.fromProxy(window.get_toplevel());
 		
-		window.addListener(new XDGSurfaceListener() {
+		window.addListener(new XDGSurfaceProxyListener() {
 			
 			@Override
 			public void configure(int arg0) {
@@ -102,7 +102,7 @@ public class JWaylandExample2 {
 		});
 		
 		toplevel.set_title("TRANS RIGHTS");
-		toplevel.addListener(new XDGToplevelListener() {
+		toplevel.addListener(new XDGToplevelProxyListener() {
 			
 			@Override
 			public void wm_capabilities(long arg0) {
@@ -137,22 +137,22 @@ public class JWaylandExample2 {
 			client_display.dispatch();
 			if(!first_dispatch) {
 				first_dispatch = true;
-				WLBuffer buf;
+				WLBufferProxy buf;
 				if(use_spb) {
 					long b32max = ((long) 1 << 32) - 1;
 					double r = 1.0f;
 					double g = 0.0f;
 					double b = 0.5f;
 					double a = 1.0f;
-					buf = WLBuffer.fromProxy(spbm.create_u32_rgba_buffer((long) (b32max * r), (long) (b32max * g), (long) (b32max * b), (long) (b32max * a)));
-					WPViewport view = WPViewport.fromProxy(viewporter.get_viewport(surface));
+					buf = WLBufferProxy.fromProxy(spbm.create_u32_rgba_buffer((long) (b32max * r), (long) (b32max * g), (long) (b32max * b), (long) (b32max * a)));
+					WPViewportProxy view = WPViewportProxy.fromProxy(viewporter.get_viewport(surface));
 					view.set_source(0, 0, 1 << 8, 1 << 8);
 					view.set_destination(500, 500);
 				}
 				else {
 					SimpleShmPool spool = SimpleShmPool.create(500 * 500 * 4);
-					WLShmPool pool = WLShmPool.fromProxy(shm.create_pool(spool.getFileDescriptor(), 500 * 500 * 4));
-					buf = WLBuffer.fromProxy(pool.create_buffer(0, 500, 500, 500 * 4, 1));
+					WLShmPoolProxy pool = WLShmPoolProxy.fromProxy(shm.create_pool(spool.getFileDescriptor(), 500 * 500 * 4));
+					buf = WLBufferProxy.fromProxy(pool.create_buffer(0, 500, 500, 500 * 4, 1));
 					pool.destroy();
 					spool.close_fd();
 					byte[] src = new byte[500 * 500 * 4];

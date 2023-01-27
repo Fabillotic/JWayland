@@ -30,7 +30,7 @@ def main():
                 j = make_java_proxy(i)
                 if j == None:
                     return
-                p = pathlib.Path(arg.directory, i['camel_name'] + ".java")
+                p = pathlib.Path(arg.directory, i['camel_name'] + "Proxy.java")
                 f = open(p, "w")
                 f.write(j)
                 f.close()
@@ -127,7 +127,7 @@ def parse_interface(interface):
     return r
 
 def make_java_proxy(iface):
-    cname = iface["camel_name"]
+    cname = iface["camel_name"] + "Proxy"
     lname = cname + "Listener"
     d = ""
     d += "package dev.fabillo.jwayland.protocol.client;\n"
@@ -222,7 +222,7 @@ def make_java_proxy(iface):
     return d
 
 def make_c_glue(iface):
-    cname = iface["camel_name"]
+    cname = iface["camel_name"] + "Proxy"
     d = ""
     d += "#include <jni.h>\n"
     d += "#include <stdio.h>\n"
