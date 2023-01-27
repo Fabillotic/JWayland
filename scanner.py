@@ -560,7 +560,7 @@ def make_interface_definition(iface):
             else:
                 print(f'ERROR! Unknown argument type: "{arg["type"]}"')
                 return
-        d += '", (struct wl_interface*[]) {'
+        d += '", (const struct wl_interface**)(struct wl_interface*[]) {'
         for n2, arg in enumerate(req["args"]):
             if n2 > 0:
                 d += ', '
@@ -604,7 +604,7 @@ def make_interface_definition(iface):
             else:
                 print(f'ERROR! Unknown argument type: "{arg["type"]}"')
                 return
-        d += '", (struct wl_interface*[]) {'
+        d += '", (const struct wl_interface**)(struct wl_interface*[]) {'
         for n2, arg in enumerate(ev["args"]):
             if n2 > 0:
                 d += ', '
