@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 def main():
     parser = argparse.ArgumentParser(prog="scanner.py", description="Generate all the necessary Java and C glue code for JWayland")
-    parser.add_argument("type", choices=["client-jni-code", "client-java-code", "server-jni-code", "server-java-code", "interface-header", "interfaces"])
+    parser.add_argument("type", choices=["client-jni-code", "client-java-code", "server-jni-code", "server-java-code", "interfaces"])
     parser.add_argument("directory", type=pathlib.Path)
     parser.add_argument("xmlfile", type=pathlib.Path, nargs="+")
     arg = parser.parse_args()
