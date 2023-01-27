@@ -1,4 +1,4 @@
-package dev.fabillo.jwayland;
+package dev.fabillo.jwayland.client;
 
 public class WLProxy {
 	

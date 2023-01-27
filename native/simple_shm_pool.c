@@ -52,11 +52,11 @@ int allocate_shm_file(size_t size) {
 	return fd;
 }
 
-JNIEXPORT jint JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_allocate_1shm_1file(JNIEnv *env, jclass clazz, jint size) {
+JNIEXPORT jint JNICALL Java_dev_fabillo_jwayland_client_SimpleShmPool_allocate_1shm_1file(JNIEnv *env, jclass clazz, jint size) {
 	return allocate_shm_file(size);
 }
 
-JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_map_1shm(JNIEnv *env, jclass clazz, jint fd, jint size) {
+JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_client_SimpleShmPool_map_1shm(JNIEnv *env, jclass clazz, jint fd, jint size) {
 	void *data;
 
 	data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -67,7 +67,7 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_map_1shm(JNIEn
 	return (*env)->NewDirectByteBuffer(env, data, size);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_unmap_1shm(JNIEnv *env, jclass clazz, jobject buffer) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_SimpleShmPool_unmap_1shm(JNIEnv *env, jclass clazz, jobject buffer) {
 	void *data;
 	int size;
 
@@ -77,6 +77,6 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_unmap_1shm(JNIEnv
 	munmap(data, size);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_close_1shm_1fd(JNIEnv *env, jclass clazz, jint fd) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_SimpleShmPool_close_1shm_1fd(JNIEnv *env, jclass clazz, jint fd) {
 	close(fd);
 }

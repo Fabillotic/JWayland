@@ -1,6 +1,6 @@
-package dev.fabillo.jwayland;
+package dev.fabillo.jwayland.client;
 
-import dev.fabillo.jwayland.protocol.WLDisplay;
+import dev.fabillo.jwayland.protocol.client.WLDisplay;
 
 public class ClientDisplay {
 	

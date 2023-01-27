@@ -1,4 +1,4 @@
-package dev.fabillo.jwayland;
+package dev.fabillo.jwayland.client;
 
 import java.nio.ByteBuffer;
 

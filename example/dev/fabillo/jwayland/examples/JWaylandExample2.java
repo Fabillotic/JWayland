@@ -1,24 +1,24 @@
 package dev.fabillo.jwayland.examples;
 
-import dev.fabillo.jwayland.ClientDisplay;
-import dev.fabillo.jwayland.SimpleShmPool;
-import dev.fabillo.jwayland.protocol.WLBuffer;
-import dev.fabillo.jwayland.protocol.WLCompositor;
-import dev.fabillo.jwayland.protocol.WLDisplay;
-import dev.fabillo.jwayland.protocol.WLRegistry;
-import dev.fabillo.jwayland.protocol.WLRegistry.WLRegistryListener;
-import dev.fabillo.jwayland.protocol.WLShm;
-import dev.fabillo.jwayland.protocol.WLShmPool;
-import dev.fabillo.jwayland.protocol.WLSurface;
-import dev.fabillo.jwayland.protocol.WPSinglePixelBufferManagerV1;
-import dev.fabillo.jwayland.protocol.WPViewport;
-import dev.fabillo.jwayland.protocol.WPViewporter;
-import dev.fabillo.jwayland.protocol.XDGSurface;
-import dev.fabillo.jwayland.protocol.XDGSurface.XDGSurfaceListener;
-import dev.fabillo.jwayland.protocol.XDGToplevel;
-import dev.fabillo.jwayland.protocol.XDGToplevel.XDGToplevelListener;
-import dev.fabillo.jwayland.protocol.XDGWmBase;
-import dev.fabillo.jwayland.protocol.XDGWmBase.XDGWmBaseListener;
+import dev.fabillo.jwayland.client.ClientDisplay;
+import dev.fabillo.jwayland.client.SimpleShmPool;
+import dev.fabillo.jwayland.protocol.client.WLBuffer;
+import dev.fabillo.jwayland.protocol.client.WLCompositor;
+import dev.fabillo.jwayland.protocol.client.WLDisplay;
+import dev.fabillo.jwayland.protocol.client.WLRegistry;
+import dev.fabillo.jwayland.protocol.client.WLShm;
+import dev.fabillo.jwayland.protocol.client.WLShmPool;
+import dev.fabillo.jwayland.protocol.client.WLSurface;
+import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1;
+import dev.fabillo.jwayland.protocol.client.WPViewport;
+import dev.fabillo.jwayland.protocol.client.WPViewporter;
+import dev.fabillo.jwayland.protocol.client.XDGSurface;
+import dev.fabillo.jwayland.protocol.client.XDGToplevel;
+import dev.fabillo.jwayland.protocol.client.XDGWmBase;
+import dev.fabillo.jwayland.protocol.client.WLRegistry.WLRegistryListener;
+import dev.fabillo.jwayland.protocol.client.XDGSurface.XDGSurfaceListener;
+import dev.fabillo.jwayland.protocol.client.XDGToplevel.XDGToplevelListener;
+import dev.fabillo.jwayland.protocol.client.XDGWmBase.XDGWmBaseListener;
 
 public class JWaylandExample2 {
 	

@@ -6,12 +6,12 @@
 jclass ClientDisplay_class;
 jfieldID ClientDisplay_native_ptr;
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_init_1jni(JNIEnv *env, jclass clazz) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_init_1jni(JNIEnv *env, jclass clazz) {
 	ClientDisplay_class = clazz;
 	ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1name(JNIEnv *env, jobject obj, jstring name) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_connect_1name(JNIEnv *env, jobject obj, jstring name) {
 	const char *name_str;
 	struct wl_display *display;
 
@@ -32,7 +32,7 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1name(JNI
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1fd(JNIEnv *env, jobject obj, jint fd) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_connect_1fd(JNIEnv *env, jobject obj, jint fd) {
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
@@ -47,7 +47,7 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_connect_1fd(JNIEn
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_disconnect(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_disconnect(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
@@ -62,7 +62,7 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_disconnect(JNIEnv
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)NULL);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_dispatch(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_dispatch(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
@@ -75,7 +75,7 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_dispatch(JNIEnv *
 	wl_display_dispatch(display);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_flush(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_flush(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
@@ -88,7 +88,7 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_flush(JNIEnv *env
 	wl_display_flush(display);
 }
 
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_ClientDisplay_roundtrip(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_roundtrip(JNIEnv *env, jobject obj) {
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);

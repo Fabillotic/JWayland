@@ -8,7 +8,7 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 	char *sig;
 	jvalue *values;
 
-	jclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLProxy");
+	jclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");
 	jfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");
 	jmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");
 
@@ -26,7 +26,7 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 			n++;
 		}
 		else if(c == 'o') {
-			strcat(sig, "Ldev/fabillo/jwayland/WLProxy;");
+			strcat(sig, "Ldev/fabillo/jwayland/client/WLProxy;");
 			n++;
 		}
 		else if(c == 'a') {

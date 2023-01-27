@@ -130,9 +130,9 @@ def make_java_proxy(iface):
     cname = iface["camel_name"]
     lname = cname + "Listener"
     d = ""
-    d += "package dev.fabillo.jwayland.protocol;\n"
+    d += "package dev.fabillo.jwayland.protocol.client;\n"
     d += "\n"
-    d += "import dev.fabillo.jwayland.WLProxy;\n"
+    d += "import dev.fabillo.jwayland.client.WLProxy;\n"
     d += "import dev.fabillo.jwayland.annotation.ProxyListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
     d += "import dev.fabillo.jwayland.annotation.WLRequest;\n"
@@ -199,7 +199,7 @@ def make_java_proxy(iface):
                 sig += "Ljava/lang/String;"
             elif arg["type"] in ["object", "new_id"]:
                 d += "WLProxy "
-                sig += "Ldev/fabillo/jwayland/WLProxy;"
+                sig += "Ldev/fabillo/jwayland/client/WLProxy;"
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
                 sig += "J"
@@ -237,7 +237,7 @@ def make_c_glue(iface):
         d += "JNIEXPORT "
         d += "jobject " if req["return_proxy"] else "void "
         d += "JNICALL "
-        d += "Java_dev_fabillo_jwayland_protocol_"
+        d += "Java_dev_fabillo_jwayland_protocol_client_"
         d += cname
         d += "_"
         d += req["name"].replace("_", "_1")
@@ -261,7 +261,7 @@ def make_c_glue(iface):
                 return
             d += sanitize_name(arg["name"])
         d += ") {\n"
-        d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLProxy");\n'
+        d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");\n'
         d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
         if req["return_proxy"]:
             d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
@@ -339,7 +339,7 @@ def make_c_glue(iface):
     d += '\tJNIEnv *env = *(JNIEnv**) user_data;\n'
     d += '\tjobject listener = (jobject) implementation;\n'
     d += '\n'
-    d += '\tjclass listener_class = (*env)->FindClass(env, "dev/fabillo/jwayland/protocol/' + cname + '$' + lname + '");\n'
+    d += '\tjclass listener_class = (*env)->FindClass(env, "dev/fabillo/jwayland/protocol/client/' + cname + '$' + lname + '");\n'
 
     for ev in iface["events"]:
         d += '\tjmethodID mListener_' + ev["name"] + ' = '
@@ -366,10 +366,10 @@ def make_c_glue(iface):
     d += '}\n'
     d += '\n'
 
-    d += 'JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_protocol_'
+    d += 'JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_protocol_client_'
     d += cname
     d += '_addListener(JNIEnv *env, jobject obj, jobject listener) {\n'
-    d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLProxy");\n'
+    d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");\n'
     d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
     d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
     d += "\n"

@@ -1,14 +1,14 @@
 package dev.fabillo.jwayland.examples;
 
-import dev.fabillo.jwayland.ClientDisplay;
-import dev.fabillo.jwayland.WLProxy;
-import dev.fabillo.jwayland.protocol.WLBuffer;
-import dev.fabillo.jwayland.protocol.WLCallback;
-import dev.fabillo.jwayland.protocol.WLCallback.WLCallbackListener;
-import dev.fabillo.jwayland.protocol.WLDisplay;
-import dev.fabillo.jwayland.protocol.WLRegistry;
-import dev.fabillo.jwayland.protocol.WLRegistry.WLRegistryListener;
-import dev.fabillo.jwayland.protocol.WPSinglePixelBufferManagerV1;
+import dev.fabillo.jwayland.client.ClientDisplay;
+import dev.fabillo.jwayland.client.WLProxy;
+import dev.fabillo.jwayland.protocol.client.WLBuffer;
+import dev.fabillo.jwayland.protocol.client.WLCallback;
+import dev.fabillo.jwayland.protocol.client.WLDisplay;
+import dev.fabillo.jwayland.protocol.client.WLRegistry;
+import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1;
+import dev.fabillo.jwayland.protocol.client.WLCallback.WLCallbackListener;
+import dev.fabillo.jwayland.protocol.client.WLRegistry.WLRegistryListener;
 
 public class JWaylandExample {
 	
