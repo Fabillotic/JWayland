@@ -31,7 +31,7 @@ public class ServerDisplay {
 	public native void destroy();
 	
 	public native WLGlobal create_global(String interface_name, int version, WLGlobalBindListener listener);
-	public native WLResource create_resource(WLClient client, String interface_name, int version, int id);
+	public native WLResource create_resource(long client, String interface_name, int version, int id);
 	
 	static {
 		System.loadLibrary("jwayland");

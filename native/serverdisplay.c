@@ -144,6 +144,10 @@ void global_bind(struct wl_client *client, void *data, uint32_t version, uint32_
 }
 
 JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1global(JNIEnv *env, jobject obj, jstring interface_name, jint version, jobject listener) {
+	jclass WLGlobal_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLGlobal");
+	jfieldID WLGlobal_native_ptr = (*env)->GetFieldID(env, WLGlobal_class, "native_ptr", "J");
+	jmethodID WLGlobal_init = (*env)->GetMethodID(env, WLGlobal_class, "<init>", "()V");
+
 	struct wl_display *display;
 	struct global_data *data;
 
@@ -157,6 +161,29 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 	data = malloc(sizeof(struct global_data));
 	data->env = env;
 	data->listener = listener_ref;
-	wl_global_create(display, get_interface_by_name((*env)->GetStringUTFChars(env, interface_name, NULL)), (int) version, data, global_bind);
-	return NULL;
+
+	struct wl_global *glob = wl_global_create(display, get_interface_by_name((*env)->GetStringUTFChars(env, interface_name, NULL)), (int) version, data, global_bind);
+	if(!glob) return NULL;
+
+	jobject global = (*env)->NewObject(env, WLGlobal_class, WLGlobal_init);
+	(*env)->SetLongField(env, global, WLGlobal_native_ptr, (jlong)(intptr_t)glob);
+	return global;
+}
+
+JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1resource(JNIEnv *env, jobject obj, jlong client, jstring interface_name, jint version, jint id) {
+	jclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");
+	jfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");
+	jmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");
+
+	struct wl_client *cl = (struct wl_client*)(intptr_t)client;
+
+	const struct wl_interface *inf = get_interface_by_name((*env)->GetStringUTFChars(env, interface_name, NULL));
+	if(!inf) return NULL;
+
+	struct wl_resource *r = wl_resource_create(cl, inf, (int) version, (uint32_t) id);
+	if(!r) return NULL;
+
+	jobject resource = (*env)->NewObject(env, WLResource_class, WLResource_init);
+	(*env)->SetLongField(env, resource, WLResource_native_ptr, (jlong)(intptr_t)r);
+	return resource;
 }
