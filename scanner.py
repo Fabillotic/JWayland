@@ -333,9 +333,6 @@ def make_java_resource(iface):
     d += "}\n"
     return d
 
-def make_c_glue_resource(iface):
-    pass
-
 def make_c_glue_proxy(iface):
     cname = iface["camel_name"] + "Proxy"
     d = ""
@@ -445,7 +442,7 @@ def make_c_glue_proxy(iface):
         d += "}\n"
     d += "\n"
 
-    dispatcher = iface["name"] + "_dispatcher"
+    dispatcher = iface["name"] + "_proxy_dispatcher"
     lname = cname + "Listener"
 
     d += 'int ' + dispatcher + '(const void *implementation, void *target, uint32_t opcode, const struct wl_message *msg, union wl_argument *args) {\n'
@@ -496,6 +493,121 @@ def make_c_glue_proxy(iface):
     d += '\twl_proxy_add_dispatcher(wproxy, '
     d += dispatcher
     d += ', listener_ref, data);\n'
+    d += "}\n"
+    return d
+
+def make_c_glue_resource(iface):
+    cname = iface["camel_name"] + "Resource"
+    d = ""
+    d += "#include <jni.h>\n"
+    d += "#include <stdio.h>\n"
+    d += "#include <stdint.h>\n"
+    d += "#include <wayland-server-core.h>\n"
+    d += '#include "interfaces.h"\n'
+    d += '#include "util.h"\n'
+    d += "\n"
+    for opcode, ev in enumerate(iface["events"]):
+        if opcode > 0:
+            d += '\n'
+        d += "JNIEXPORT void JNICALL "
+        d += "Java_dev_fabillo_jwayland_protocol_server_"
+        d += cname
+        d += "_"
+        d += ev["name"].replace("_", "_1")
+        d += "(JNIEnv *env, jobject obj"
+        for arg in ev["args"]:
+            d += ", "
+            if arg["type"] in ["int", "fixed", "fd", "new_id"]:
+                d += "jint "
+            elif arg["type"] == "uint":
+                d += "jlong "
+            elif arg["type"] == "string":
+                d += "jstring "
+            elif arg["type"] == "object":
+                d += "jobject "
+            elif arg["type"] == "array":
+                d += "jlong " #TODO: Placeholder, arrays unimplemented
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+            d += sanitize_name(arg["name"])
+        d += ") {\n"
+        d += '\tjclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");\n'
+        d += '\tjfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");\n'
+        d += '\n'
+        d += '\tstruct wl_resource *wresource = (struct wl_resource*)(intptr_t)(*env)->GetLongField(env, obj, WLResource_native_ptr);\n'
+        d += '\twl_resource_post_event(wresource, '
+        d += str(opcode)
+        for arg in ev["args"]:
+            d += ', '
+            if arg["type"] in ["int", "fixed", "fd", "new_id"]:
+                d += '(int32_t) ' + sanitize_name(arg["name"])
+            elif arg["type"] == "uint":
+                d += '(uint32_t) ' + sanitize_name(arg["name"])
+            elif arg["type"] == "string":
+                d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
+            elif arg["type"] == "object":
+                d += '(struct wl_resource*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLResource_native_ptr)'
+            elif arg["type"] == "array":
+                d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
+            else:
+                print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
+                return
+        d += ');\n';
+        d += "}\n"
+    d += "\n"
+
+    dispatcher = iface["name"] + "_resource_dispatcher"
+    lname = cname + "Listener"
+
+    d += 'int ' + dispatcher + '(const void *implementation, void *target, uint32_t opcode, const struct wl_message *msg, union wl_argument *args) {\n'
+    d += '\tstruct wl_resource *resource = (struct wl_resource*) target;\n'
+    d += '\tvoid* user_data = wl_resource_get_user_data(resource);\n'
+    d += '\tJNIEnv *env = *(JNIEnv**) user_data;\n'
+    d += '\tjobject listener = (jobject) implementation;\n'
+    d += '\n'
+    d += '\tjclass listener_class = (*env)->FindClass(env, "dev/fabillo/jwayland/protocol/server/' + cname + '$' + lname + '");\n'
+
+    for req in iface["requests"]:
+        d += '\tjmethodID mListener_' + req["name"] + ' = '
+        d += '(*env)->GetMethodID(env, listener_class, "' + req["name"] + '", '
+        d += '"' + req["signature"] + '");\n'
+
+    d += '\n'
+    d += '\tjvalue *values;\n'
+    d += '\tchar *sig;\n'
+    d += '\n'
+    d += '\targuments_to_java(env, msg, args, &sig, &values);\n'
+
+    d += '\tswitch(opcode) {\n'
+
+    for n, req in enumerate(iface["requests"]):
+        d += f'\t\tcase {n}: (*env)->CallVoidMethodA(env, listener, mListener_{req["name"]}, values); break;\n'
+
+    d += '\t\tdefault: break;\n'
+    d += '\t}\n'
+
+    d += '\n'
+    d += '\treturn 0;\n'
+
+    d += '}\n'
+    d += '\n'
+
+    d += 'JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_protocol_server_'
+    d += cname
+    d += '_addListener(JNIEnv *env, jobject obj, jobject listener) {\n'
+    d += '\tjclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");\n'
+    d += '\tjfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");\n'
+    d += '\tjmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");\n'
+    d += "\n"
+    d += "\tjobject listener_ref = (*env)->NewGlobalRef(env, listener);\n"
+    d += "\n"
+    d += '\tstruct wl_resource *wresource = (struct wl_resource*)(intptr_t)(*env)->GetLongField(env, obj, WLResource_native_ptr);\n'
+    d += '\tJNIEnv **data = malloc(sizeof(JNIEnv*));\n'
+    d += '\t*data = env;\n'
+    d += '\twl_resource_set_dispatcher(wresource, '
+    d += dispatcher
+    d += ', listener_ref, data, NULL);\n'
     d += "}\n"
     return d
 
