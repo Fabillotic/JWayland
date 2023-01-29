@@ -2,7 +2,7 @@ PROTOCOL_CLIENT_DIR = protocol/client
 PROTOCOL_SERVER_DIR = protocol/server
 UTIL_DIR = .
 BIN = libjwayland.so
-OBJ = clientdisplay.o serverdisplay.o simple_shm_pool.o protocol/interfaces.o $(subst .c,.o,$(wildcard $(PROTOCOL_CLIENT_DIR)/*.c)) $(subst .c,.o,$(wildcard $(PROTOCOL_SERVER_DIR)/*.c))
+OBJ = clientdisplay.o serverdisplay.o simple_shm_pool.o shmbuffer.o eventloop.o protocol/interfaces.o $(subst .c,.o,$(wildcard $(PROTOCOL_CLIENT_DIR)/*.c)) $(subst .c,.o,$(wildcard $(PROTOCOL_SERVER_DIR)/*.c))
 
 ifeq ($(JAVA_HOME),)
 JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
@@ -20,6 +20,12 @@ serverdisplay.o: serverdisplay.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
 simple_shm_pool.o: simple_shm_pool.c
+	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
+
+shmbuffer.o: shmbuffer.c
+	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
+
+eventloop.o: eventloop.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
 $(PROTOCOL_CLIENT_DIR)/%.o: $(PROTOCOL_CLIENT_DIR)/%.c $(UTIL_DIR)/util.h

@@ -1,20 +1,27 @@
 package dev.fabillo.jwayland.examples;
 
+import java.util.ArrayList;
+
+import dev.fabillo.jwayland.protocol.server.WLBufferResource;
 import dev.fabillo.jwayland.protocol.server.WLCallbackResource;
 import dev.fabillo.jwayland.protocol.server.WLCompositorResource;
 import dev.fabillo.jwayland.protocol.server.WLCompositorResource.WLCompositorResourceListener;
 import dev.fabillo.jwayland.protocol.server.WLSurfaceResource;
 import dev.fabillo.jwayland.protocol.server.WLSurfaceResource.WLSurfaceResourceListener;
 import dev.fabillo.jwayland.server.ServerDisplay;
+import dev.fabillo.jwayland.server.WLEventLoop;
 import dev.fabillo.jwayland.server.WLGlobal;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
 import dev.fabillo.jwayland.server.WLResource;
+import dev.fabillo.jwayland.server.WLShmBuffer;
 
 public class JWaylandServerExample {
 
 	public static void main(String[] args) {
 		ServerDisplay display = ServerDisplay.create();
 		System.out.println("Listening on '" + display.add_socket_auto() + "'...");
+		
+		ArrayList<WLCallbackResource> callbacks = new ArrayList<WLCallbackResource>();
 		
 		WLGlobal wl_compositor_global = display.create_global("wl_compositor", 5, new WLGlobalBindListener() {
 			
@@ -28,7 +35,7 @@ public class JWaylandServerExample {
 					@Override
 					public void create_surface(int id) {
 						System.out.println("CREATE SURFACE!");
-						WLResource surface_resource = display.create_resource(client, "wl_surface", 1, id);
+						WLResource surface_resource = display.create_resource(client, "wl_surface", 5, id);
 						WLSurfaceResource surface = WLSurfaceResource.fromResource(surface_resource);
 						surface.addListener(new WLSurfaceResourceListener() {
 							
@@ -59,11 +66,10 @@ public class JWaylandServerExample {
 							
 							@Override
 							public void frame(int callback_id) {
-								System.out.println("Surface frame!");
+//								System.out.println("Surface frame!");
 								WLResource callback_resource = display.create_resource(client, "wl_callback", 1, callback_id);
 								WLCallbackResource callback = WLCallbackResource.fromResource(callback_resource);
-								System.out.println("Sending done!");
-								callback.done(0);
+								callbacks.add(callback);
 							}
 							
 							@Override
@@ -87,8 +93,13 @@ public class JWaylandServerExample {
 							}
 							
 							@Override
-							public void attach(WLResource buffer, int x, int y) {
-								
+							public void attach(WLResource buffer_resource, int x, int y) {
+								WLBufferResource buffer = WLBufferResource.fromResource(buffer_resource);
+								System.out.println("Attach: " + buffer);
+								WLShmBuffer shm_buffer = WLShmBuffer.get(buffer);
+								System.out.println(shm_buffer + ", " + shm_buffer.get_width() + ", " + shm_buffer.get_height());
+								byte data[] = new byte[shm_buffer.get_height() * shm_buffer.get_stride()];
+								shm_buffer.get_data().get(data);
 							}
 						});
 					}
@@ -101,10 +112,22 @@ public class JWaylandServerExample {
 				System.out.println(compositor);
 			}
 		});
-		
 		System.out.println(wl_compositor_global);
 		
-		display.run();
+		display.init_shm();
+		
+		WLEventLoop loop = display.get_event_loop();
+		System.out.println(loop);
+		
+		boolean running = true;
+		while(running) {
+			display.flush_clients();
+			loop.dispatch(-1);
+			for(WLCallbackResource c : callbacks) {
+				c.done(System.currentTimeMillis());
+			}
+			callbacks.clear();
+		}
 		display.destroy();
 	}
 

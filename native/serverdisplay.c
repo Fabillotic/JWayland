@@ -127,6 +127,19 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_destroy(JN
 	wl_display_destroy(display);
 }
 
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_init_1shm(JNIEnv *env, jobject obj) {
+	struct wl_display *display;
+
+	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
+	if(!display) {
+		printf("DISPLAY DOES NOT EXIST!\n");
+		fflush(stdout);
+		return;
+	}
+
+	wl_display_init_shm(display);
+}
+
 struct global_data {
 	JNIEnv *env;
 	jobject listener;
@@ -186,4 +199,24 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 	jobject resource = (*env)->NewObject(env, WLResource_class, WLResource_init);
 	(*env)->SetLongField(env, resource, WLResource_native_ptr, (jlong)(intptr_t)r);
 	return resource;
+}
+
+JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_get_1event_1loop(JNIEnv *env, jobject obj) {
+	jclass WLEventLoop_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLEventLoop");
+	jfieldID WLEventLoop_native_ptr = (*env)->GetFieldID(env, WLEventLoop_class, "native_ptr", "J");
+	jmethodID WLEventLoop_init = (*env)->GetMethodID(env, WLEventLoop_class, "<init>", "()V");
+
+	struct wl_display *display;
+
+	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
+	if(!display) {
+		printf("DISPLAY DOES NOT EXIST!\n");
+		fflush(stdout);
+		return NULL;
+	}
+	struct wl_event_loop *wloop = wl_display_get_event_loop(display);
+
+	jobject loop = (*env)->NewObject(env, WLEventLoop_class, WLEventLoop_init);
+	(*env)->SetLongField(env, loop, WLEventLoop_native_ptr, (jlong)(intptr_t)wloop);
+	return loop;
 }

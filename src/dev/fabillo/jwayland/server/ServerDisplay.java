@@ -30,8 +30,11 @@ public class ServerDisplay {
 	public native void destroy_clients();
 	public native void destroy();
 	
+	public native void init_shm();
+	
 	public native WLGlobal create_global(String interface_name, int version, WLGlobalBindListener listener);
 	public native WLResource create_resource(long client, String interface_name, int version, int id);
+	public native WLEventLoop get_event_loop();
 	
 	static {
 		System.loadLibrary("jwayland");
