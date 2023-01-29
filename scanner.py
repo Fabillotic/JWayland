@@ -311,7 +311,7 @@ def make_java_resource(iface):
                 sig += "Ljava/lang/String;"
             elif arg["type"] == "object":
                 d += "WLResource "
-                sig += "Ldev/fabillo/jwayland/client/WLResource;"
+                sig += "Ldev/fabillo/jwayland/server/WLResource;"
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
                 sig += "J"
