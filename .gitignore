@@ -6,3 +6,4 @@ classes/
 jwayland.jar
 *.xml
 !build.xml
+hs_err_pid*
