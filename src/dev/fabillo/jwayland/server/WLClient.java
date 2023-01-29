@@ -23,5 +23,17 @@ public class WLClient {
 		}
 		return false;
 	}
+	
+	public static interface WLClientCreatedListener {
+		
+		public void client_created(long client);
+		
+	}
+	
+	public static interface WLClientDestroyedListener {
+		
+		public void client_destroyed(long client);
+		
+	}
 
 }

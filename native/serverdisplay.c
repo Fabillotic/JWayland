@@ -220,3 +220,44 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_get_1ev
 	(*env)->SetLongField(env, loop, WLEventLoop_native_ptr, (jlong)(intptr_t)wloop);
 	return loop;
 }
+
+jobject client_created_listener_obj = NULL;
+JNIEnv *j_env;
+
+void on_client_create(struct wl_listener *listener, void *data) {
+	jclass WLClientCreatedListener_class = (*j_env)->FindClass(j_env, "dev/fabillo/jwayland/server/WLClient$WLClientCreatedListener");
+	jmethodID WLClientCreatedListener_client_created = (*j_env)->GetMethodID(j_env, WLClientCreatedListener_class, "client_created", "(J)V");
+
+	if(!client_created_listener_obj) {
+		printf("ERROR: listener engaged even though no listener object is present!\n");
+		fflush(stdout);
+		return;
+	}
+
+	(*j_env)->CallVoidMethod(j_env, client_created_listener_obj, WLClientCreatedListener_client_created, (jlong)(intptr_t)data);
+}
+
+struct wl_listener client_created_listener = {
+	.notify = on_client_create
+};
+
+JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1client_1created_1listener(JNIEnv *env, jobject obj, jobject listener) {
+	struct wl_display *display;
+
+	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
+	if(!display) {
+		printf("DISPLAY DOES NOT EXIST!\n");
+		fflush(stdout);
+		return;
+	}
+
+	if(client_created_listener_obj) {
+		printf("A CLIENT CREATION LISTENER WAS ALREADY REGISTERED!\n");
+		fflush(stdout);
+		return;
+	}
+
+	j_env = env;
+	wl_display_add_client_created_listener(display, &client_created_listener);
+	client_created_listener_obj = (*env)->NewGlobalRef(env, listener);
+}

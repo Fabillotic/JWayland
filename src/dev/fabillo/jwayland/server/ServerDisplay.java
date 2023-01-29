@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.server.WLClient.WLClientCreatedListener;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
 
 public class ServerDisplay {
@@ -35,6 +36,8 @@ public class ServerDisplay {
 	public native WLGlobal create_global(String interface_name, int version, WLGlobalBindListener listener);
 	public native WLResource create_resource(long client, String interface_name, int version, int id);
 	public native WLEventLoop get_event_loop();
+	
+	public native void add_client_created_listener(WLClientCreatedListener listener);
 	
 	static {
 		System.loadLibrary("jwayland");

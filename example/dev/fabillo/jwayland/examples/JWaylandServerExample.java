@@ -1,6 +1,14 @@
 package dev.fabillo.jwayland.examples;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import dev.fabillo.jwayland.protocol.server.WLBufferResource;
 import dev.fabillo.jwayland.protocol.server.WLCallbackResource;
@@ -9,15 +17,33 @@ import dev.fabillo.jwayland.protocol.server.WLCompositorResource.WLCompositorRes
 import dev.fabillo.jwayland.protocol.server.WLSurfaceResource;
 import dev.fabillo.jwayland.protocol.server.WLSurfaceResource.WLSurfaceResourceListener;
 import dev.fabillo.jwayland.server.ServerDisplay;
+import dev.fabillo.jwayland.server.WLClient.WLClientCreatedListener;
 import dev.fabillo.jwayland.server.WLEventLoop;
 import dev.fabillo.jwayland.server.WLGlobal;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
 import dev.fabillo.jwayland.server.WLResource;
 import dev.fabillo.jwayland.server.WLShmBuffer;
 
-public class JWaylandServerExample {
+public class JWaylandServerExample extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+	
+	private JFrame frame;
+	private HashMap<Long, BufferedImage> imageMap = new HashMap<>();
 
 	public static void main(String[] args) {
+		JWaylandServerExample instance = new JWaylandServerExample();
+		instance.run();
+	}
+	
+	public void run() {
+		frame = new JFrame("JWayland Example Compositor");
+		frame.setSize(1000, 750);
+		frame.add(this);
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		
 		ServerDisplay display = ServerDisplay.create();
 		System.out.println("Listening on '" + display.add_socket_auto() + "'...");
 		
@@ -66,7 +92,7 @@ public class JWaylandServerExample {
 							
 							@Override
 							public void frame(int callback_id) {
-//								System.out.println("Surface frame!");
+								System.out.println("Surface frame!");
 								WLResource callback_resource = display.create_resource(client, "wl_callback", 1, callback_id);
 								WLCallbackResource callback = WLCallbackResource.fromResource(callback_resource);
 								callbacks.add(callback);
@@ -97,9 +123,22 @@ public class JWaylandServerExample {
 								WLBufferResource buffer = WLBufferResource.fromResource(buffer_resource);
 								System.out.println("Attach: " + buffer);
 								WLShmBuffer shm_buffer = WLShmBuffer.get(buffer);
-								System.out.println(shm_buffer + ", " + shm_buffer.get_width() + ", " + shm_buffer.get_height());
-								byte data[] = new byte[shm_buffer.get_height() * shm_buffer.get_stride()];
+								int w = shm_buffer.get_width();
+								int h = shm_buffer.get_height();
+								int s = shm_buffer.get_stride();
+								System.out.println(shm_buffer + ", " + w + ", " + h);
+								byte data[] = new byte[s * h];
 								shm_buffer.get_data().get(data);
+								
+								BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+								byte[] imgdata = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+								for(int i = 0; i < w * h; i++) {
+									imgdata[i * 4 + 1] = data[i * 4 + 0];
+									imgdata[i * 4 + 2] = data[i * 4 + 1];
+									imgdata[i * 4 + 3] = data[i * 4 + 2];
+									imgdata[i * 4 + 0] = data[i * 4 + 3];
+								}
+								imageMap.put(client, image);
 							}
 						});
 					}
@@ -116,19 +155,42 @@ public class JWaylandServerExample {
 		
 		display.init_shm();
 		
+		display.add_client_created_listener(new WLClientCreatedListener() {
+			
+			@Override
+			public void client_created(long client) {
+				System.out.println("New client: " + client);
+			}
+		});
+		
 		WLEventLoop loop = display.get_event_loop();
 		System.out.println(loop);
 		
 		boolean running = true;
+		long last = System.currentTimeMillis();
 		while(running) {
 			display.flush_clients();
-			loop.dispatch(-1);
-			for(WLCallbackResource c : callbacks) {
-				c.done(System.currentTimeMillis());
+			loop.dispatch(0);
+			if(System.currentTimeMillis() - last >= 20) {
+				for(WLCallbackResource c : callbacks) {
+					c.done(System.currentTimeMillis());
+				}
+				callbacks.clear();
+				this.repaint();
+				last = System.currentTimeMillis();
 			}
-			callbacks.clear();
 		}
 		display.destroy();
+	}
+	
+	@Override
+	public void paint(Graphics g) {
+		super.paint(g);
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, 1000, 750);
+		for(BufferedImage image : imageMap.values()) {
+			g.drawImage(image, 0, 0, null);
+		}
 	}
 
 }
