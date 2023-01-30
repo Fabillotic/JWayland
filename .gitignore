@@ -4,6 +4,5 @@
 bin/
 classes/
 jwayland.jar
-*.xml
-!build.xml
+protocols/
 hs_err_pid*
