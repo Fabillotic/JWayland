@@ -91,7 +91,7 @@ def main():
         f.close()
 
 def parse_interface(interface):
-    r = {"name": interface.attrib["name"]}
+    r = {"name": sanitize_name(interface.attrib["name"])}
     print(f"{r['name']}...")
     r["camel_name"] = ""
     first_underscore = False
@@ -107,7 +107,7 @@ def parse_interface(interface):
     r["version"] = interface.attrib["version"]
     r["requests"] = []
     for req in interface.findall("request"):
-        t = {"name": req.attrib["name"], "args": []}
+        t = {"name": sanitize_name(req.attrib["name"]), "args": []}
         #read request XML
         for arg in req.findall("arg"):
             a = {"name": arg.attrib["name"], "type": arg.attrib["type"]}
@@ -138,7 +138,7 @@ def parse_interface(interface):
         r["requests"].append(t)
     r["events"] = []
     for ev in interface.findall("event"):
-        t = {"name": ev.attrib["name"], "args": []}
+        t = {"name": sanitize_name(ev.attrib["name"]), "args": []}
         for arg in ev.findall("arg"):
             a = {"name": arg.attrib["name"], "type": arg.attrib["type"]}
             if "interface" in arg.attrib:
@@ -750,6 +750,8 @@ def sanitize_name(name):
         return "iface"
     elif name == "class":
         return "clazz"
+    elif name == "import":
+        return "imprt"
     return name
 
 if __name__ == "__main__":
