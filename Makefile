@@ -1,8 +1,8 @@
-PROTOCOL_CLIENT_DIR = protocol/client
-PROTOCOL_SERVER_DIR = protocol/server
-UTIL_DIR = .
-BIN = libjwayland.so
-OBJ = clientdisplay.o serverdisplay.o simple_shm_pool.o shmbuffer.o eventloop.o protocol/interfaces.o $(subst .c,.o,$(wildcard $(PROTOCOL_CLIENT_DIR)/*.c)) $(subst .c,.o,$(wildcard $(PROTOCOL_SERVER_DIR)/*.c))
+PROTOCOL_CLIENT_DIR = native/protocol/client
+PROTOCOL_SERVER_DIR = native/protocol/server
+UTIL_DIR = native
+BIN = native/libjwayland.so
+OBJ = $(addprefix native/,clientdisplay.o serverdisplay.o simple_shm_pool.o shmbuffer.o eventloop.o protocol/interfaces.o) $(subst .c,.o,$(wildcard $(PROTOCOL_CLIENT_DIR)/*.c)) $(subst .c,.o,$(wildcard $(PROTOCOL_SERVER_DIR)/*.c))
 
 ifeq ($(JAVA_HOME),)
 JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
@@ -13,19 +13,19 @@ all: $(BIN)
 $(BIN): $(OBJ) $(PROTOCOL_OBJ)
 	$(CC) -fPIC -shared -o $(BIN) $(OBJ) $(PROTOCOL_OBJ) -lwayland-client -lwayland-server
 
-clientdisplay.o: clientdisplay.c
+native/clientdisplay.o: native/clientdisplay.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
-serverdisplay.o: serverdisplay.c
+native/serverdisplay.o: native/serverdisplay.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
-simple_shm_pool.o: simple_shm_pool.c
+native/simple_shm_pool.o: native/simple_shm_pool.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
-shmbuffer.o: shmbuffer.c
+native/shmbuffer.o: native/shmbuffer.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
-eventloop.o: eventloop.c
+native/eventloop.o: native/eventloop.c
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
 $(PROTOCOL_CLIENT_DIR)/%.o: $(PROTOCOL_CLIENT_DIR)/%.c $(UTIL_DIR)/util.h
@@ -34,7 +34,7 @@ $(PROTOCOL_CLIENT_DIR)/%.o: $(PROTOCOL_CLIENT_DIR)/%.c $(UTIL_DIR)/util.h
 $(PROTOCOL_SERVER_DIR)/%.o: $(PROTOCOL_SERVER_DIR)/%.c $(UTIL_DIR)/util.h
 	$(CC) -fPIC -c -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR) -o $@ $<
 
-protocol/interfaces.o: protocol/interfaces.c
+native/protocol/interfaces.o: native/protocol/interfaces.c
 	$(CC) -fPIC -c -I$(UTIL_DIR) -o $@ $<
 
 clean:
