@@ -770,9 +770,14 @@ def get_camel_name(name):
     first_underscore = False
     for n, c in enumerate(name):
         if c != "_":
-            if name[n - 1] == "_":
-                first_underscore = True
+            if n == 0:
                 camel_name += c.upper()
+            elif name[n - 1] == "_":
+                first_underscore = True
+                if n == 1:
+                    camel_name += c
+                else:
+                    camel_name += c.upper()
             elif not first_underscore:
                 camel_name += c.upper()
             else:
