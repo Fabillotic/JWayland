@@ -33,7 +33,7 @@ public class JWaylandExample2 {
 		ClientDisplay client_display = ClientDisplay.connect(null);
 		WLDisplayProxy display = client_display.getProxy();
 		
-		WLRegistryProxy registry = WLRegistryProxy.fromProxy(display.get_registry());
+		WLRegistryProxy registry = display.get_registry();
 		registry.addListener(new WLRegistryProxyListener() {
 			
 			@Override
@@ -65,16 +65,17 @@ public class JWaylandExample2 {
 			return;
 		}
 		
-		if(spbm == null && use_spb) {
-			System.out.println("Didn't receive spbm!");
-			client_display.disconnect();
-			return;
-		}
-
-		if(viewporter == null && use_spb) {
-			System.out.println("Didn't receive viewporter!");
-			client_display.disconnect();
-			return;
+		if(use_spb) {
+			if(spbm == null) {
+				System.out.println("Didn't receive spbm!");
+				client_display.disconnect();
+				return;
+			}
+			if(viewporter == null) {
+				System.out.println("Didn't receive viewporter!");
+				client_display.disconnect();
+				return;
+			}
 		}
 		
 		wm_base.addListener(new XDGWmBaseProxyListener() {
@@ -86,11 +87,11 @@ public class JWaylandExample2 {
 			}
 		});
 		
-		WLSurfaceProxy surface = WLSurfaceProxy.fromProxy(compositor.create_surface());
+		WLSurfaceProxy surface = compositor.create_surface();
 		System.out.println("surface: " + surface);
-		XDGSurfaceProxy window = XDGSurfaceProxy.fromProxy(wm_base.get_xdg_surface(surface));
+		XDGSurfaceProxy window = wm_base.get_xdg_surface(surface);
 		System.out.println("window: " + window);
-		XDGToplevelProxy toplevel = XDGToplevelProxy.fromProxy(window.get_toplevel());
+		XDGToplevelProxy toplevel = window.get_toplevel();
 		
 		window.addListener(new XDGSurfaceProxyListener() {
 			
@@ -144,15 +145,15 @@ public class JWaylandExample2 {
 					double g = 0.0f;
 					double b = 0.5f;
 					double a = 1.0f;
-					buf = WLBufferProxy.fromProxy(spbm.create_u32_rgba_buffer((long) (b32max * r), (long) (b32max * g), (long) (b32max * b), (long) (b32max * a)));
-					WPViewportProxy view = WPViewportProxy.fromProxy(viewporter.get_viewport(surface));
+					buf = spbm.create_u32_rgba_buffer((long) (b32max * r), (long) (b32max * g), (long) (b32max * b), (long) (b32max * a));
+					WPViewportProxy view = viewporter.get_viewport(surface);
 					view.set_source(0, 0, 1 << 8, 1 << 8);
 					view.set_destination(500, 500);
 				}
 				else {
 					SimpleShmPool spool = SimpleShmPool.create(500 * 500 * 4);
-					WLShmPoolProxy pool = WLShmPoolProxy.fromProxy(shm.create_pool(spool.getFileDescriptor(), 500 * 500 * 4));
-					buf = WLBufferProxy.fromProxy(pool.create_buffer(0, 500, 500, 500 * 4, 1));
+					WLShmPoolProxy pool = shm.create_pool(spool.getFileDescriptor(), 500 * 500 * 4);
+					buf = pool.create_buffer(0, 500, 500, 500 * 4, 1);
 					pool.destroy();
 					spool.close_fd();
 					byte[] src = new byte[500 * 500 * 4];

@@ -19,9 +19,8 @@ public class JWaylandExample {
 		
 		WLDisplayProxy display = connection.getProxy();
 		System.out.println("display: " + display);
-		WLProxy p = display.sync();
-		System.out.println(p);
-		WLCallbackProxy c = WLCallbackProxy.fromProxy(p);
+		WLCallbackProxy c = display.sync();
+		System.out.println(c);
 		c.addListener(new WLCallbackProxyListener() {
 			
 			@Override
@@ -31,7 +30,7 @@ public class JWaylandExample {
 		});
 		System.out.println("Sync called!");
 		
-		WLRegistryProxy registry = WLRegistryProxy.fromProxy(display.get_registry());
+		WLRegistryProxy registry = display.get_registry();
 		System.out.println("registry: " + registry);
 		registry.addListener(new WLRegistryProxyListener() {
 			
@@ -54,9 +53,8 @@ public class JWaylandExample {
 		});
 		connection.roundtrip();
 		
-		WLProxy bprox = pix.create_u32_rgba_buffer(127, 127, 127, 127);
-		System.out.println("BUFFER CREATED: " + bprox);
-		WLBufferProxy buf = WLBufferProxy.fromProxy(bprox);
+		WLBufferProxy buf = pix.create_u32_rgba_buffer(127, 127, 127, 127);
+		System.out.println("BUFFER CREATED: " + buf);
 		System.out.println("CALLING DESTROY: " + buf);
 		buf.destroy();
 		System.out.println("Buffer created and destroyed again!");

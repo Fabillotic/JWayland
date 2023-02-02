@@ -165,7 +165,16 @@ def make_java_proxy(iface):
             d += "\t\n"
         d += "\t@WLRequest\n"
         d += "\tpublic native "
-        d += "WLProxy " if req["return_proxy"] else "void "
+        if req["return_proxy"]:
+            for arg in req["args"]:
+                if arg["type"] == "new_id":
+                    if "interface" in arg:
+                        d += get_camel_name(arg["interface"]) + "Proxy "
+                    else:
+                        d += "WLProxy "
+                    break
+        else:
+            d += "void "
         d += req["name"]
         d += "("
         for n, arg in enumerate(req["args"]):
@@ -365,8 +374,18 @@ def make_c_glue_proxy(iface):
         d += ") {\n"
         d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");\n'
         d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
+        iname = None
         if req["return_proxy"]:
-            d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
+            for arg in req["args"]:
+                if arg["type"] == "new_id":
+                    if "interface" in arg:
+                        iname = get_camel_name(arg["interface"]) + "Proxy"
+                        d += f'\tjclass {iname}_class = (*env)->FindClass(env, "dev/fabillo/jwayland/protocol/client/{iname}");\n'
+                        d += f'\tjfieldID {iname}_native_ptr = (*env)->GetFieldID(env, {iname}_class, "native_ptr", "J");\n'
+                    else:
+                        iname = "WLProxy"
+                    d += f'\tjmethodID {iname}_init = (*env)->GetMethodID(env, {iname}_class, "<init>", "()V");\n'
+                    break
         d += '\n'
         d += '\tstruct wl_proxy *wproxy = (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, obj, WLProxy_native_ptr);\n'
         if req["return_proxy"]:
@@ -407,8 +426,8 @@ def make_c_glue_proxy(iface):
                     return
             d += ');\n';
             d += '\tif(!nproxy) return NULL;\n'
-            d += '\tjobject prox = (*env)->NewObject(env, WLProxy_class, WLProxy_init);\n'
-            d += '\t(*env)->SetLongField(env, prox, WLProxy_native_ptr, (jlong)(intptr_t)nproxy);\n'
+            d += f'\tjobject prox = (*env)->NewObject(env, {iname}_class, {iname}_init);\n'
+            d += f'\t(*env)->SetLongField(env, prox, {iname}_native_ptr, (jlong)(intptr_t)nproxy);\n'
             d += '\treturn prox;\n'
         else:
             d += '\twl_proxy_marshal(wproxy, '
