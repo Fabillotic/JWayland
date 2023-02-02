@@ -1,8 +1,8 @@
 package dev.fabillo.jwayland.server;
 
-public class WLEventLoop {
-	
-	public long native_ptr = 0;
+import dev.fabillo.jwayland.WLObject;
+
+public class WLEventLoop extends WLObject {
 	
 	public WLEventLoop() {
 	}

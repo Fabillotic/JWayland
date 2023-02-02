@@ -1,8 +1,8 @@
 package dev.fabillo.jwayland.client;
 
-public class WLProxy {
-	
-	public long native_ptr = 0;
+import dev.fabillo.jwayland.WLObject;
+
+public class WLProxy extends WLObject {
 	
 	public WLProxy() {
 	}

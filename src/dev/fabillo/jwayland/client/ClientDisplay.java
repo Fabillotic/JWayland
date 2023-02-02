@@ -1,10 +1,9 @@
 package dev.fabillo.jwayland.client;
 
+import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
 
-public class ClientDisplay {
-	
-	public long native_ptr = 0;
+public class ClientDisplay extends WLObject {
 	
 	private ClientDisplay() {
 	}

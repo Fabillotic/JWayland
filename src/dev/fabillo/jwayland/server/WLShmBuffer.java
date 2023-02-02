@@ -2,11 +2,10 @@ package dev.fabillo.jwayland.server;
 
 import java.nio.ByteBuffer;
 
+import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.protocol.server.WLBufferResource;
 
-public class WLShmBuffer {
-	
-	public long native_ptr = 0;
+public class WLShmBuffer extends WLObject {
 	
 	public WLShmBuffer() {
 	}

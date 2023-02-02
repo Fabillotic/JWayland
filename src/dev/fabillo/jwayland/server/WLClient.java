@@ -1,8 +1,8 @@
 package dev.fabillo.jwayland.server;
 
-public class WLClient {
-	
-	public long native_ptr = 0;
+import dev.fabillo.jwayland.WLObject;
+
+public class WLClient extends WLObject {
 	
 	public WLClient() {
 	}

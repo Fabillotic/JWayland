@@ -1,11 +1,10 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.server.WLClient.WLClientCreatedListener;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
 
-public class ServerDisplay {
-	
-	public long native_ptr = 0;
+public class ServerDisplay extends WLObject {
 	
 	private ServerDisplay() {
 	}
