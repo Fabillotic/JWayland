@@ -93,17 +93,7 @@ def main():
 def parse_interface(interface):
     r = {"name": sanitize_name(interface.attrib["name"])}
     print(f"{r['name']}...")
-    r["camel_name"] = ""
-    first_underscore = False
-    for n, c in enumerate(r["name"]):
-        if c != "_":
-            if r["name"][n - 1] == "_":
-                first_underscore = True
-                r["camel_name"] += c.upper()
-            elif not first_underscore:
-                r["camel_name"] += c.upper()
-            else:
-                r["camel_name"] += c
+    r["camel_name"] = get_camel_name(r["name"])
     r["version"] = interface.attrib["version"]
     r["requests"] = []
     for req in interface.findall("request"):
@@ -752,7 +742,23 @@ def sanitize_name(name):
         return "clazz"
     elif name == "import":
         return "imprt"
+    elif name == "native":
+        return "nativ"
     return name
+
+def get_camel_name(name):
+    camel_name = ""
+    first_underscore = False
+    for n, c in enumerate(name):
+        if c != "_":
+            if name[n - 1] == "_":
+                first_underscore = True
+                camel_name += c.upper()
+            elif not first_underscore:
+                camel_name += c.upper()
+            else:
+                camel_name += c
+    return camel_name
 
 if __name__ == "__main__":
     main()
