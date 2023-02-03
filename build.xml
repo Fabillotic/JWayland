@@ -16,4 +16,9 @@
 			</fileset>
 		</jar>
 	</target>
+	<target name="source_jar">
+		<jar destfile="jwayland_source.jar">
+			<fileset dir="src" includes="**/*.java"/>
+		</jar>
+	</target>
 </project>

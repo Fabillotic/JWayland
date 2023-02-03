@@ -1,5 +1,6 @@
 JAR = jwayland.jar
 NATIVE_JAR = jwayland_native.jar
+SOURCE_JAR = jwayland_source.jar
 JAVA = $(shell find src/ -name '*.java')
 PROTOCOLS = $(shell find protocols/ -name '*.xml')
 NATIVE_PROTOCOL_CLIENT_DIR = native/protocol/client
@@ -17,7 +18,7 @@ ifeq ($(JAVA_HOME),)
 JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
 endif
 
-all: $(JAR) $(NATIVE_JAR)
+all: $(JAR) $(NATIVE_JAR) $(SOURCE_JAR)
 
 $(JAR): $(BIN) $(JAVA)
 	ant jar
@@ -27,6 +28,9 @@ $(BIN): $(OBJ) $(PROTOCOL_OBJ)
 
 $(NATIVE_JAR): $(BIN)
 	ant native_jar
+
+$(SOURCE_JAR): $(JAVA)
+	ant source_jar
 
 $(OBJ):
 
