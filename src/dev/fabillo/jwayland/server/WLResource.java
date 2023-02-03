@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.JWayland;
 import dev.fabillo.jwayland.WLObject;
 
 public class WLResource extends WLObject {
@@ -10,6 +11,8 @@ public class WLResource extends WLObject {
 	public WLResource(long native_ptr) {
 		this.native_ptr = native_ptr;
 	}
+	
+	public native long get_client();
 	
 	@Override
 	public String toString() {
@@ -22,6 +25,10 @@ public class WLResource extends WLObject {
 			if(((WLResource) obj).native_ptr == native_ptr) return true;
 		}
 		return false;
+	}
+	
+	static {
+		JWayland.loadLibrary();
 	}
 
 }

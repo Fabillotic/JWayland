@@ -10,7 +10,7 @@ JAVA_PROTOCOL_SERVER_DIR = src/dev/fabillo/jwayland/protocol/server
 UTIL_DIR = native
 BIN_NAME = libjwayland.so
 BIN = native/$(BIN_NAME)
-OBJ = $(addprefix native/,clientdisplay.o serverdisplay.o simple_shm_pool.o shmbuffer.o eventloop.o protocol/interfaces.o) $(subst .c,.o,$(wildcard $(NATIVE_PROTOCOL_CLIENT_DIR)/*.c)) $(subst .c,.o,$(wildcard $(NATIVE_PROTOCOL_SERVER_DIR)/*.c))
+OBJ = $(addprefix native/,clientdisplay.o serverdisplay.o resource.o simple_shm_pool.o shmbuffer.o eventloop.o protocol/interfaces.o) $(subst .c,.o,$(wildcard $(NATIVE_PROTOCOL_CLIENT_DIR)/*.c)) $(subst .c,.o,$(wildcard $(NATIVE_PROTOCOL_SERVER_DIR)/*.c))
 
 CFLAGS = -fPIC -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -I$(UTIL_DIR)
 
