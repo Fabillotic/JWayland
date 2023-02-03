@@ -6,4 +6,5 @@ classes/
 *.o
 *.class
 jwayland.jar
+jwayland_native.jar
 hs_err_pid*

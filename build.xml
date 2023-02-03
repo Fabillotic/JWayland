@@ -7,6 +7,10 @@
 	<target name="jar" depends="compile">
 		<jar destfile="jwayland.jar">
 			<fileset dir="classes" includes="**/*.class"/>
+		</jar>
+	</target>
+	<target name="native_jar" depends="compile">
+		<jar destfile="jwayland_native.jar">
 			<fileset dir="native">
 				<include name="libjwayland.so"/>
 			</fileset>
