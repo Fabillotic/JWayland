@@ -143,6 +143,7 @@ def make_java_proxy(iface):
     d = ""
     d += "package dev.fabillo.jwayland.protocol.client;\n"
     d += "\n"
+    d += "import dev.fabillo.jwayland.JWayland;\n"
     d += "import dev.fabillo.jwayland.client.WLProxy;\n"
     d += "import dev.fabillo.jwayland.annotation.ProxyListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
@@ -235,7 +236,7 @@ def make_java_proxy(iface):
     d += "\t}\n"
     d += "\t\n"
     d += "\tstatic {\n"
-    d += '\t\tSystem.loadLibrary("jwayland");\n'
+    d += '\t\tJWayland.loadLibrary();\n'
     d += "\t}\n"
     d += "\t\n"
     d += "}\n"
@@ -247,6 +248,7 @@ def make_java_resource(iface):
     d = ""
     d += "package dev.fabillo.jwayland.protocol.server;\n"
     d += "\n"
+    d += "import dev.fabillo.jwayland.JWayland;\n"
     d += "import dev.fabillo.jwayland.server.WLResource;\n"
     d += "import dev.fabillo.jwayland.annotation.ResourceListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
@@ -326,7 +328,7 @@ def make_java_resource(iface):
     d += "\t}\n"
     d += "\t\n"
     d += "\tstatic {\n"
-    d += '\t\tSystem.loadLibrary("jwayland");\n'
+    d += '\t\tJWayland.loadLibrary();\n'
     d += "\t}\n"
     d += "\t\n"
     d += "}\n"

@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.JWayland;
 import dev.fabillo.jwayland.WLObject;
 
 public class WLEventLoop extends WLObject {
@@ -27,7 +28,7 @@ public class WLEventLoop extends WLObject {
 	}
 	
 	static {
-		System.loadLibrary("jwayland");
+		JWayland.loadLibrary();
 	}
 
 }

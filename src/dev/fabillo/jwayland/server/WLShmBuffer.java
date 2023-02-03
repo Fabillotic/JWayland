@@ -2,6 +2,7 @@ package dev.fabillo.jwayland.server;
 
 import java.nio.ByteBuffer;
 
+import dev.fabillo.jwayland.JWayland;
 import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.protocol.server.WLBufferResource;
 
@@ -36,7 +37,7 @@ public class WLShmBuffer extends WLObject {
 	}
 	
 	static {
-		System.loadLibrary("jwayland");
+		JWayland.loadLibrary();
 	}
 
 }

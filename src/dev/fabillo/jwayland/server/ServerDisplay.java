@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.JWayland;
 import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.server.WLClient.WLClientCreatedListener;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
@@ -39,7 +40,7 @@ public class ServerDisplay extends WLObject {
 	public native void add_client_created_listener(WLClientCreatedListener listener);
 	
 	static {
-		System.loadLibrary("jwayland");
+		JWayland.loadLibrary();
 		init_jni();
 	}
 	

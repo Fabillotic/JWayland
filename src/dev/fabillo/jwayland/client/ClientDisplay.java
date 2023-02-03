@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.client;
 
+import dev.fabillo.jwayland.JWayland;
 import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
 
@@ -39,7 +40,7 @@ public class ClientDisplay extends WLObject {
 	public native void roundtrip();
 	
 	static {
-		System.loadLibrary("jwayland");
+		JWayland.loadLibrary();
 		init_jni();
 	}
 	

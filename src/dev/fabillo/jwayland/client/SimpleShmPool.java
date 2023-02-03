@@ -2,6 +2,8 @@ package dev.fabillo.jwayland.client;
 
 import java.nio.ByteBuffer;
 
+import dev.fabillo.jwayland.JWayland;
+
 public final class SimpleShmPool {
 	
 	private int fd = -1;
@@ -47,6 +49,6 @@ public final class SimpleShmPool {
 	private static native void close_shm_fd(int fd);
 
 	static {
-		System.loadLibrary("jwayland");
+		JWayland.loadLibrary();
 	}
 }
