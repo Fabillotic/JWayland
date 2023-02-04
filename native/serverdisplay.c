@@ -150,10 +150,14 @@ void global_bind(struct wl_client *client, void *data, uint32_t version, uint32_
 	JNIEnv *env = d->env;
 
 	jclass WLGlobalBindListener_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLGlobal$WLGlobalBindListener");
-	//jmethodID WLGlobalBindListener_bind = (*env)->GetMethodID(env, WLGlobalBindListener_class, "bind", "(Ldev/fabillo/jwayland/server/WLClient;II)V");
-	jmethodID WLGlobalBindListener_bind = (*env)->GetMethodID(env, WLGlobalBindListener_class, "bind", "(JII)V");
+	jmethodID WLGlobalBindListener_bind = (*env)->GetMethodID(env, WLGlobalBindListener_class, "bind", "(Ldev/fabillo/jwayland/server/WLClient;II)V");
+	jclass WLClient_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLClient");
+	jfieldID WLClient_native_ptr = (*env)->GetFieldID(env, WLClient_class, "native_ptr", "J");
+	jmethodID WLClient_init = (*env)->GetMethodID(env, WLClient_class, "<init>", "()V");
 
-	(*env)->CallVoidMethod(env, d->listener, WLGlobalBindListener_bind, (jlong)(intptr_t)client, (jint)version, (jint)id);
+	jobject c = (*env)->NewObject(env, WLClient_class, WLClient_init);
+	(*env)->SetLongField(env, c, WLClient_native_ptr, (jlong)(intptr_t)client);
+	(*env)->CallVoidMethod(env, d->listener, WLGlobalBindListener_bind, c, (jint)version, (jint)id);
 }
 
 JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1global(JNIEnv *env, jobject obj, jstring interface_name, jint version, jobject listener) {

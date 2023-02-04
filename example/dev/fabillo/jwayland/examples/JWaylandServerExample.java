@@ -53,9 +53,8 @@ public class JWaylandServerExample extends JPanel {
 		WLGlobal wl_compositor_global = display.create_global("wl_compositor", 5, new WLGlobalBindListener() {
 			
 			@Override
-			public void bind(long client_handle, int version, int id) {
+			public void bind(WLClient client, int version, int id) {
 				System.out.println("Client attempted to bind wl_compositor!");
-				WLClient client = new WLClient(client_handle);
 				WLResource compositor_resource = display.create_resource(client, "wl_compositor", version, id);
 				WLCompositorResource compositor = WLCompositorResource.fromResource(compositor_resource);
 				compositor.addListener(new WLCompositorResourceListener() {

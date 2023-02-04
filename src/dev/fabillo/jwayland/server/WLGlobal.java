@@ -26,7 +26,7 @@ public class WLGlobal extends WLObject {
 	
 	public static interface WLGlobalBindListener {
 		
-		public void bind(long client, int version, int id);
+		public void bind(WLClient client, int version, int id);
 		
 	}
 }
