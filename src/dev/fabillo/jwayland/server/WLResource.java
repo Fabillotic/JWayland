@@ -12,7 +12,7 @@ public class WLResource extends WLObject {
 		super(native_ptr);
 	}
 	
-	public native long get_client();
+	public native WLClient get_client();
 	
 	@Override
 	public String toString() {

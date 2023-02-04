@@ -26,13 +26,13 @@ public class WLClient extends WLObject {
 	
 	public static interface WLClientCreatedListener {
 		
-		public void client_created(long client);
+		public void client_created(WLClient client);
 		
 	}
 	
 	public static interface WLClientDestroyedListener {
 		
-		public void client_destroyed(long client);
+		public void client_destroyed();
 		
 	}
 

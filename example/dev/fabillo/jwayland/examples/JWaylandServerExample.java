@@ -17,6 +17,7 @@ import dev.fabillo.jwayland.protocol.server.WLCompositorResource.WLCompositorRes
 import dev.fabillo.jwayland.protocol.server.WLSurfaceResource;
 import dev.fabillo.jwayland.protocol.server.WLSurfaceResource.WLSurfaceResourceListener;
 import dev.fabillo.jwayland.server.ServerDisplay;
+import dev.fabillo.jwayland.server.WLClient;
 import dev.fabillo.jwayland.server.WLClient.WLClientCreatedListener;
 import dev.fabillo.jwayland.server.WLEventLoop;
 import dev.fabillo.jwayland.server.WLGlobal;
@@ -29,7 +30,7 @@ public class JWaylandServerExample extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private JFrame frame;
-	private HashMap<Long, BufferedImage> imageMap = new HashMap<>();
+	private HashMap<WLClient, BufferedImage> imageMap = new HashMap<>();
 
 	public static void main(String[] args) {
 		JWaylandServerExample instance = new JWaylandServerExample();
@@ -52,8 +53,9 @@ public class JWaylandServerExample extends JPanel {
 		WLGlobal wl_compositor_global = display.create_global("wl_compositor", 5, new WLGlobalBindListener() {
 			
 			@Override
-			public void bind(long client, int version, int id) {
+			public void bind(long client_handle, int version, int id) {
 				System.out.println("Client attempted to bind wl_compositor!");
+				WLClient client = new WLClient(client_handle);
 				WLResource compositor_resource = display.create_resource(client, "wl_compositor", version, id);
 				WLCompositorResource compositor = WLCompositorResource.fromResource(compositor_resource);
 				compositor.addListener(new WLCompositorResourceListener() {
@@ -158,7 +160,7 @@ public class JWaylandServerExample extends JPanel {
 		display.add_client_created_listener(new WLClientCreatedListener() {
 			
 			@Override
-			public void client_created(long client) {
+			public void client_created(WLClient client) {
 				System.out.println("New client: " + client);
 			}
 		});

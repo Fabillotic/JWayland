@@ -183,12 +183,14 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 	return global;
 }
 
-JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1resource(JNIEnv *env, jobject obj, jlong client, jstring interface_name, jint version, jint id) {
+JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1resource(JNIEnv *env, jobject obj, jobject client, jstring interface_name, jint version, jint id) {
 	jclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");
 	jfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");
 	jmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");
+	jclass WLClient_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLClient");
+	jfieldID WLClient_native_ptr = (*env)->GetFieldID(env, WLClient_class, "native_ptr", "J");
 
-	struct wl_client *cl = (struct wl_client*)(intptr_t)client;
+	struct wl_client *cl = (struct wl_client*)(intptr_t)(*env)->GetLongField(env, client, WLClient_native_ptr);
 
 	const struct wl_interface *inf = get_interface_by_name((*env)->GetStringUTFChars(env, interface_name, NULL));
 	if(!inf) return NULL;
@@ -226,7 +228,10 @@ JNIEnv *j_env;
 
 void on_client_create(struct wl_listener *listener, void *data) {
 	jclass WLClientCreatedListener_class = (*j_env)->FindClass(j_env, "dev/fabillo/jwayland/server/WLClient$WLClientCreatedListener");
-	jmethodID WLClientCreatedListener_client_created = (*j_env)->GetMethodID(j_env, WLClientCreatedListener_class, "client_created", "(J)V");
+	jmethodID WLClientCreatedListener_client_created = (*j_env)->GetMethodID(j_env, WLClientCreatedListener_class, "client_created", "(Ldev/fabillo/jwayland/server/WLClient;)V");
+	jclass WLClient_class = (*j_env)->FindClass(j_env, "dev/fabillo/jwayland/server/WLClient");
+	jfieldID WLClient_native_ptr = (*j_env)->GetFieldID(j_env, WLClient_class, "native_ptr", "J");
+	jmethodID WLClient_init = (*j_env)->GetMethodID(j_env, WLClient_class, "<init>", "()V");
 
 	if(!client_created_listener_obj) {
 		printf("ERROR: listener engaged even though no listener object is present!\n");
@@ -234,7 +239,9 @@ void on_client_create(struct wl_listener *listener, void *data) {
 		return;
 	}
 
-	(*j_env)->CallVoidMethod(j_env, client_created_listener_obj, WLClientCreatedListener_client_created, (jlong)(intptr_t)data);
+	jobject client = (*j_env)->NewObject(j_env, WLClient_class, WLClient_init);
+	(*j_env)->SetLongField(j_env, client, WLClient_native_ptr, (jlong)(intptr_t)data);
+	(*j_env)->CallVoidMethod(j_env, client_created_listener_obj, WLClientCreatedListener_client_created, client);
 }
 
 struct wl_listener client_created_listener = {
