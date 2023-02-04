@@ -15,4 +15,9 @@ public abstract class WLObject {
 		return native_ptr;
 	}
 	
+	@Override
+	public int hashCode() {
+		return (int) (getPointer()^(getPointer()>>>32));
+	}
+
 }
