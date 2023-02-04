@@ -13,7 +13,7 @@ public class ServerDisplay extends WLObject {
 	public static ServerDisplay create() {
 		ServerDisplay display = new ServerDisplay();
 		display.create_native();
-		if(display.native_ptr == 0) {
+		if(display.getPointer() == 0) {
 			return null;
 		}
 		return display;

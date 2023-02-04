@@ -9,20 +9,20 @@ public class WLResource extends WLObject {
 	}
 	
 	public WLResource(long native_ptr) {
-		this.native_ptr = native_ptr;
+		super(native_ptr);
 	}
 	
 	public native long get_client();
 	
 	@Override
 	public String toString() {
-		return "RESOURCE(0x" + Long.toHexString(native_ptr) + ")";
+		return "RESOURCE(0x" + Long.toHexString(getPointer()) + ")";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof WLResource) {
-			if(((WLResource) obj).native_ptr == native_ptr) return true;
+			if(((WLResource) obj).getPointer() == getPointer()) return true;
 		}
 		return false;
 	}

@@ -8,18 +8,18 @@ public class WLGlobal extends WLObject {
 	}
 	
 	public WLGlobal(long native_ptr) {
-		this.native_ptr = native_ptr;
+		super(native_ptr);
 	}
 	
 	@Override
 	public String toString() {
-		return "GLOBAL(0x" + Long.toHexString(native_ptr) + ")";
+		return "GLOBAL(0x" + Long.toHexString(getPointer()) + ")";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof WLGlobal) {
-			if(((WLGlobal) obj).native_ptr == native_ptr) return true;
+			if(((WLGlobal) obj).getPointer() == getPointer()) return true;
 		}
 		return false;
 	}

@@ -12,7 +12,7 @@ public class WLShmBuffer extends WLObject {
 	}
 	
 	public WLShmBuffer(long native_ptr) {
-		this.native_ptr = native_ptr;
+		super(native_ptr);
 	}
 	
 	public static native WLShmBuffer get(WLBufferResource resource);
@@ -25,13 +25,13 @@ public class WLShmBuffer extends WLObject {
 	
 	@Override
 	public String toString() {
-		return "SHM_BUFFER(0x" + Long.toHexString(native_ptr) + ")";
+		return "SHM_BUFFER(0x" + Long.toHexString(getPointer()) + ")";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof WLShmBuffer) {
-			if(((WLShmBuffer) obj).native_ptr == native_ptr) return true;
+			if(((WLShmBuffer) obj).getPointer() == getPointer()) return true;
 		}
 		return false;
 	}

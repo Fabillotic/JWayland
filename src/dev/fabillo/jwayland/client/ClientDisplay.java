@@ -12,7 +12,7 @@ public class ClientDisplay extends WLObject {
 	public static ClientDisplay connect(String name) {
 		ClientDisplay display = new ClientDisplay();
 		display.connect_name(name);
-		if(display.native_ptr == 0) {
+		if(display.getPointer() == 0) {
 			return null;
 		}
 		return display;
@@ -29,8 +29,7 @@ public class ClientDisplay extends WLObject {
 	private native void connect_fd(int fd);
 	
 	public WLDisplayProxy getProxy() {
-		WLDisplayProxy display = new WLDisplayProxy();
-		display.native_ptr = native_ptr;
+		WLDisplayProxy display = new WLDisplayProxy(getPointer());
 		return display;
 	}
 	

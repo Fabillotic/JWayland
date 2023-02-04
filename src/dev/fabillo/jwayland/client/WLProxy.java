@@ -8,18 +8,18 @@ public class WLProxy extends WLObject {
 	}
 	
 	public WLProxy(long native_ptr) {
-		this.native_ptr = native_ptr;
+		super(native_ptr);
 	}
 	
 	@Override
 	public String toString() {
-		return "PROXY(0x" + Long.toHexString(native_ptr) + ")";
+		return "PROXY(0x" + Long.toHexString(getPointer()) + ")";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof WLProxy) {
-			if(((WLProxy) obj).native_ptr == native_ptr) return true;
+			if(((WLProxy) obj).getPointer() == getPointer()) return true;
 		}
 		return false;
 	}

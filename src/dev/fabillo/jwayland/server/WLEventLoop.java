@@ -9,20 +9,20 @@ public class WLEventLoop extends WLObject {
 	}
 	
 	public WLEventLoop(long native_ptr) {
-		this.native_ptr = native_ptr;
+		super(native_ptr);
 	}
 	
 	public native void dispatch(int timeout);
 	
 	@Override
 	public String toString() {
-		return "EVENT_LOOP(0x" + Long.toHexString(native_ptr) + ")";
+		return "EVENT_LOOP(0x" + Long.toHexString(getPointer()) + ")";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof WLEventLoop) {
-			if(((WLEventLoop) obj).native_ptr == native_ptr) return true;
+			if(((WLEventLoop) obj).getPointer() == getPointer()) return true;
 		}
 		return false;
 	}
