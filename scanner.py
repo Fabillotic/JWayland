@@ -144,6 +144,7 @@ def make_java_proxy(iface):
     d += "package dev.fabillo.jwayland.protocol.client;\n"
     d += "\n"
     d += "import dev.fabillo.jwayland.JWayland;\n"
+    d += "import dev.fabillo.jwayland.WLFixed;\n"
     d += "import dev.fabillo.jwayland.client.WLProxy;\n"
     d += "import dev.fabillo.jwayland.annotation.ProxyListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
@@ -190,7 +191,7 @@ def make_java_proxy(iface):
             #Check if a comma needs to be added, new_id at the start may cause issues
             if n > (1 if req["args"][0]["type"] == "new_id" else 0):
                 d += ", "
-            if arg["type"] in ["int", "fixed", "fd"]:
+            if arg["type"] in ["int", "fd"]:
                 d += "int "
             elif arg["type"] == "uint":
                 d += "long "
@@ -198,6 +199,8 @@ def make_java_proxy(iface):
                 d += "String "
             elif arg["type"] == "object":
                 d += "WLProxy "
+            elif arg["type"] == "fixed":
+                d += "WLFixed "
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
             else:
@@ -218,7 +221,7 @@ def make_java_proxy(iface):
         for n, arg in enumerate(ev["args"]):
             if n > 0:
                 d += ", "
-            if arg["type"] in ["int", "uint", "fixed", "fd"]:
+            if arg["type"] in ["int", "uint", "fd"]:
                 d += "int "
                 sig += "I"
             elif arg["type"] == "string":
@@ -227,6 +230,9 @@ def make_java_proxy(iface):
             elif arg["type"] in ["object", "new_id"]:
                 d += "WLProxy "
                 sig += "Ldev/fabillo/jwayland/client/WLProxy;"
+            elif arg["type"] == "fixed":
+                d += "WLFixed "
+                sig += "Ldev/fabillo/jwayland/WLFixed;"
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
                 sig += "J"
@@ -255,6 +261,7 @@ def make_java_resource(iface):
     d += "package dev.fabillo.jwayland.protocol.server;\n"
     d += "\n"
     d += "import dev.fabillo.jwayland.JWayland;\n"
+    d += "import dev.fabillo.jwayland.WLFixed;\n"
     d += "import dev.fabillo.jwayland.server.WLResource;\n"
     d += "import dev.fabillo.jwayland.annotation.ResourceListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
@@ -288,7 +295,7 @@ def make_java_resource(iface):
         for n, arg in enumerate(ev["args"]):
             if n > 0:
                 d += ", "
-            if arg["type"] in ["int", "fixed", "fd", "new_id"]:
+            if arg["type"] in ["int", "fd", "new_id"]:
                 d += "int "
             elif arg["type"] == "uint":
                 d += "long "
@@ -296,6 +303,8 @@ def make_java_resource(iface):
                 d += "String "
             elif arg["type"] == "object":
                 d += "WLResource "
+            elif arg["type"] == "fixed":
+                d += "WLFixed "
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
             else:
@@ -316,7 +325,7 @@ def make_java_resource(iface):
         for n, arg in enumerate(req["args"]):
             if n > 0:
                 d += ", "
-            if arg["type"] in ["int", "uint", "fixed", "fd", "new_id"]:
+            if arg["type"] in ["int", "uint", "fd", "new_id"]:
                 d += "int "
                 sig += "I"
             elif arg["type"] == "string":
@@ -325,6 +334,9 @@ def make_java_resource(iface):
             elif arg["type"] == "object":
                 d += "WLResource "
                 sig += "Ldev/fabillo/jwayland/server/WLResource;"
+            elif arg["type"] == "fixed":
+                d += "WLFixed "
+                sig += "Ldev/fabillo/jwayland/server/WLFixed;"
             elif arg["type"] == "array":
                 d += "long " #TODO: Placeholder, arrays unimplemented
                 sig += "J"
@@ -371,13 +383,15 @@ def make_c_glue_proxy(iface):
             if arg["type"] == "new_id":
                 continue
             d += ", "
-            if arg["type"] in ["int", "fixed", "fd"]:
+            if arg["type"] in ["int", "fd"]:
                 d += "jint "
             elif arg["type"] == "uint":
                 d += "jlong "
             elif arg["type"] == "string":
                 d += "jstring "
             elif arg["type"] == "object":
+                d += "jobject "
+            elif arg["type"] == "fixed":
                 d += "jobject "
             elif arg["type"] == "array":
                 d += "jlong " #TODO: Placeholder, arrays unimplemented
@@ -388,6 +402,8 @@ def make_c_glue_proxy(iface):
         d += ") {\n"
         d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");\n'
         d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
+        d += '\tjclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");\n'
+        d += '\tjfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");\n'
         iname = None
         if req["return_proxy"]:
             for arg in req["args"]:
@@ -423,7 +439,7 @@ def make_c_glue_proxy(iface):
             d += ", inf"
             for arg in req["args"]:
                 d += ', '
-                if arg["type"] in ["int", "fixed", "fd"]:
+                if arg["type"] in ["int", "fd"]:
                     d += '(int32_t) ' + sanitize_name(arg["name"])
                 elif arg["type"] == "uint":
                     d += '(uint32_t) ' + sanitize_name(arg["name"])
@@ -431,6 +447,8 @@ def make_c_glue_proxy(iface):
                     d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
                 elif arg["type"] == "object":
                     d += '(struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr)'
+                elif arg["type"] == "fixed":
+                    d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
                 elif arg["type"] == "array":
                     d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
                 elif arg["type"] == "new_id":
@@ -448,7 +466,7 @@ def make_c_glue_proxy(iface):
             d += str(opcode)
             for arg in req["args"]:
                 d += ', '
-                if arg["type"] in ["int", "fixed", "fd"]:
+                if arg["type"] in ["int", "fd"]:
                     d += '(int32_t) ' + sanitize_name(arg["name"])
                 elif arg["type"] == "uint":
                     d += '(uint32_t) ' + sanitize_name(arg["name"])
@@ -456,6 +474,8 @@ def make_c_glue_proxy(iface):
                     d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
                 elif arg["type"] == "object":
                     d += '(struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr)'
+                elif arg["type"] == "fixed":
+                    d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
                 elif arg["type"] == "array":
                     d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
                 else:
@@ -485,7 +505,7 @@ def make_c_glue_proxy(iface):
     d += '\tjvalue *values;\n'
     d += '\tchar *sig;\n'
     d += '\n'
-    d += '\targuments_to_java(env, msg, args, &sig, &values);\n'
+    d += '\targuments_to_java_client(env, msg, args, &sig, &values);\n'
 
     d += '\tswitch(opcode) {\n'
 
@@ -540,13 +560,15 @@ def make_c_glue_resource(iface):
         d += "(JNIEnv *env, jobject obj"
         for arg in ev["args"]:
             d += ", "
-            if arg["type"] in ["int", "fixed", "fd", "new_id"]:
+            if arg["type"] in ["int", "fd", "new_id"]:
                 d += "jint "
             elif arg["type"] == "uint":
                 d += "jlong "
             elif arg["type"] == "string":
                 d += "jstring "
             elif arg["type"] == "object":
+                d += "jobject "
+            elif arg["type"] == "fixed":
                 d += "jobject "
             elif arg["type"] == "array":
                 d += "jlong " #TODO: Placeholder, arrays unimplemented
@@ -557,13 +579,15 @@ def make_c_glue_resource(iface):
         d += ") {\n"
         d += '\tjclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");\n'
         d += '\tjfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");\n'
+        d += '\tjclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");\n'
+        d += '\tjfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");\n'
         d += '\n'
         d += '\tstruct wl_resource *wresource = (struct wl_resource*)(intptr_t)(*env)->GetLongField(env, obj, WLResource_native_ptr);\n'
         d += '\twl_resource_post_event(wresource, '
         d += str(opcode)
         for arg in ev["args"]:
             d += ', '
-            if arg["type"] in ["int", "fixed", "fd", "new_id"]:
+            if arg["type"] in ["int", "fd", "new_id"]:
                 d += '(int32_t) ' + sanitize_name(arg["name"])
             elif arg["type"] == "uint":
                 d += '(uint32_t) ' + sanitize_name(arg["name"])
@@ -571,6 +595,8 @@ def make_c_glue_resource(iface):
                 d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
             elif arg["type"] == "object":
                 d += '(struct wl_resource*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLResource_native_ptr)'
+            elif arg["type"] == "fixed":
+                d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
             elif arg["type"] == "array":
                 d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
             else:
@@ -600,7 +626,7 @@ def make_c_glue_resource(iface):
     d += '\tjvalue *values;\n'
     d += '\tchar *sig;\n'
     d += '\n'
-    d += '\targuments_to_java(env, msg, args, &sig, &values);\n'
+    d += '\targuments_to_java_server(env, msg, args, &sig, &values);\n'
 
     d += '\tswitch(opcode) {\n'
 

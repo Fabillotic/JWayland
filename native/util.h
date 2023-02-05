@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
-static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, union wl_argument *args, char **r_sig, jvalue **r_values) {
+static inline void arguments_to_java_client(JNIEnv *env, const struct wl_message *msg, union wl_argument *args, char **r_sig, jvalue **r_values) {
 	int i, n;
 	char c;
 	char *sig;
@@ -12,13 +12,16 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 	jclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");
 	jfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");
 	jmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");
+	jclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");
+	jfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");
+	jmethodID WLFixed_init = (*env)->GetMethodID(env, WLFixed_class, "<init>", "()V");
 
 	sig = malloc(200);
 	sig[0] = '\0';
 	for(i = 0; (c = msg->signature[i]) != '\0'; i++) {
 		if(c >= '0' && c <= '9') continue;
 		else if(c == '?') continue;
-		else if(c == 'i' || c == 'u' || c == 'h' || c == 'f' || c == 'n') {
+		else if(c == 'i' || c == 'u' || c == 'h' || c == 'n') {
 			strcat(sig, "I");
 			n++;
 		}
@@ -28,6 +31,10 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 		}
 		else if(c == 'o') {
 			strcat(sig, "Ldev/fabillo/jwayland/client/WLProxy;");
+			n++;
+		}
+		else if(c == 'f') {
+			strcat(sig, "Ldev/fabillo/jwayland/WLFixed;");
 			n++;
 		}
 		else if(c == 'a') {
@@ -40,7 +47,7 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 		for(i = 0; (c = msg->signature[i]) != '\0'; i++) {
 			if(c >= '0' && c <= '9') continue;
 			else if(c == '?') continue;
-			else if(c == 'i' || c == 'u' || c == 'h' || c == 'f' || c == 'n') {
+			else if(c == 'i' || c == 'u' || c == 'h' || c == 'n') {
 				values[n].i = (jint) args[n].i;
 				n++;
 			}
@@ -51,6 +58,80 @@ static inline void arguments_to_java(JNIEnv *env, const struct wl_message *msg, 
 			else if(c == 'o') {
 				values[n].l = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
 				(*env)->SetLongField(env, values[n].l, WLProxy_native_ptr, (jlong)(intptr_t)args[n].o);
+				n++;
+			}
+			else if(c == 'f') {
+				values[n].l = (*env)->NewObject(env, WLFixed_class, WLFixed_init);
+				(*env)->SetIntField(env, values[n].l, WLFixed_data, args[n].i);
+				n++;
+			}
+		}
+		*r_values = values;
+	}
+	else *r_values = NULL;
+	*r_sig = sig;
+}
+
+static inline void arguments_to_java_server(JNIEnv *env, const struct wl_message *msg, union wl_argument *args, char **r_sig, jvalue **r_values) {
+	int i, n;
+	char c;
+	char *sig;
+	jvalue *values;
+
+	jclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");
+	jfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");
+	jmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");
+	jclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");
+	jfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");
+	jmethodID WLFixed_init = (*env)->GetMethodID(env, WLFixed_class, "<init>", "()V");
+
+	sig = malloc(200);
+	sig[0] = '\0';
+	for(i = 0; (c = msg->signature[i]) != '\0'; i++) {
+		if(c >= '0' && c <= '9') continue;
+		else if(c == '?') continue;
+		else if(c == 'i' || c == 'u' || c == 'h' || c == 'n') {
+			strcat(sig, "I");
+			n++;
+		}
+		else if(c == 's') {
+			strcat(sig, "Ljava/lang/String;");
+			n++;
+		}
+		else if(c == 'o') {
+			strcat(sig, "Ldev/fabillo/jwayland/server/WLResource;");
+			n++;
+		}
+		else if(c == 'f') {
+			strcat(sig, "Ldev/fabillo/jwayland/WLFixed;");
+			n++;
+		}
+		else if(c == 'a') {
+			/* TODO: Not yet supported */
+		}
+	}
+	if(n > 0) {
+		values = malloc(sizeof(jvalue) * n);
+		n = 0;
+		for(i = 0; (c = msg->signature[i]) != '\0'; i++) {
+			if(c >= '0' && c <= '9') continue;
+			else if(c == '?') continue;
+			else if(c == 'i' || c == 'u' || c == 'h' || c == 'n') {
+				values[n].i = (jint) args[n].i;
+				n++;
+			}
+			else if(c == 's') {
+				values[n].l = (jobject) (*env)->NewStringUTF(env, args[n].s);
+				n++;
+			}
+			else if(c == 'o') {
+				values[n].l = (*env)->NewObject(env, WLResource_class, WLResource_init);
+				(*env)->SetLongField(env, values[n].l, WLResource_native_ptr, (jlong)(intptr_t)args[n].o);
+				n++;
+			}
+			else if(c == 'f') {
+				values[n].l = (*env)->NewObject(env, WLFixed_class, WLFixed_init);
+				(*env)->SetIntField(env, values[n].l, WLFixed_data, args[n].i);
 				n++;
 			}
 		}

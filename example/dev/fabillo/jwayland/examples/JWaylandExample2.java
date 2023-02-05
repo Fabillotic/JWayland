@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.examples;
 
+import dev.fabillo.jwayland.WLFixed;
 import dev.fabillo.jwayland.client.ClientDisplay;
 import dev.fabillo.jwayland.client.SimpleShmPool;
 import dev.fabillo.jwayland.protocol.client.WLBufferProxy;
@@ -22,7 +23,7 @@ import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy.XDGWmBaseProxyListene
 
 public class JWaylandExample2 {
 	
-	private static final boolean use_spb = false;
+	private static final boolean use_spb = true;
 	private static WLCompositorProxy compositor;
 	private static XDGWmBaseProxy wm_base;
 	private static WPSinglePixelBufferManagerV1Proxy spbm;
@@ -147,7 +148,7 @@ public class JWaylandExample2 {
 					double a = 1.0f;
 					buf = spbm.create_u32_rgba_buffer((long) (b32max * r), (long) (b32max * g), (long) (b32max * b), (long) (b32max * a));
 					WPViewportProxy view = viewporter.get_viewport(surface);
-					view.set_source(0, 0, 1 << 8, 1 << 8);
+					view.set_source(new WLFixed(0, 0), new WLFixed(0, 0), new WLFixed(1, 0), new WLFixed(1, 0));
 					view.set_destination(500, 500);
 				}
 				else {
