@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <wayland-server-core.h>
+#include "util.h"
 #include "interfaces.h"
 
 jclass ServerDisplay_class;
@@ -188,11 +190,18 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 }
 
 JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1resource(JNIEnv *env, jobject obj, jobject client, jstring interface_name, jint version, jint id) {
-	jclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");
-	jfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");
-	jmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");
 	jclass WLClient_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLClient");
 	jfieldID WLClient_native_ptr = (*env)->GetFieldID(env, WLClient_class, "native_ptr", "J");
+
+	char c[200];
+	c[0] = 0;
+	strcat(c, "dev/fabillo/jwayland/protocol/server/");
+	get_camel_name(c + strlen(c), (*env)->GetStringUTFChars(env, interface_name, NULL));
+	strcat(c, "Resource");
+
+	jclass InterfaceResource_class = (*env)->FindClass(env, c);
+	jfieldID InterfaceResource_native_ptr = (*env)->GetFieldID(env, InterfaceResource_class, "native_ptr", "J");
+	jmethodID InterfaceResource_init = (*env)->GetMethodID(env, InterfaceResource_class, "<init>", "()V");
 
 	struct wl_client *cl = (struct wl_client*)(intptr_t)(*env)->GetLongField(env, client, WLClient_native_ptr);
 
@@ -202,8 +211,8 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 	struct wl_resource *r = wl_resource_create(cl, inf, (int) version, (uint32_t) id);
 	if(!r) return NULL;
 
-	jobject resource = (*env)->NewObject(env, WLResource_class, WLResource_init);
-	(*env)->SetLongField(env, resource, WLResource_native_ptr, (jlong)(intptr_t)r);
+	jobject resource = (*env)->NewObject(env, InterfaceResource_class, InterfaceResource_init);
+	(*env)->SetLongField(env, resource, InterfaceResource_native_ptr, (jlong)(intptr_t)r);
 	return resource;
 }
 
