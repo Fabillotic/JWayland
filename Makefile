@@ -42,7 +42,7 @@ scan: clean_protocols
 	python3 scanner.py server-java-code $(JAVA_PROTOCOL_SERVER_DIR) $(PROTOCOLS)
 
 clean:
-	rm -f $(BIN) $(OBJ) $(JAR) $(NATIVE_JAR)
+	rm -f $(BIN) $(OBJ) $(JAR) $(NATIVE_JAR) $(SOURCE_JAR)
 	rm -rf classes
 
 clean_protocols: clean
