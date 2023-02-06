@@ -12,9 +12,6 @@ public class ClientDisplay extends WLObject {
 	public static ClientDisplay connect(String name) {
 		ClientDisplay display = new ClientDisplay();
 		display.connect_name(name);
-		if(display.getPointer() == 0) {
-			return null;
-		}
 		return display;
 	}
 	
@@ -24,7 +21,6 @@ public class ClientDisplay extends WLObject {
 		return display;
 	}
 	
-	private static native void init_jni();
 	private native void connect_name(String name);
 	private native void connect_fd(int fd);
 	
@@ -40,7 +36,6 @@ public class ClientDisplay extends WLObject {
 	
 	static {
 		JWayland.loadLibrary();
-		init_jni();
 	}
 	
 }

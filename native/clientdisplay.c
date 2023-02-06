@@ -3,22 +3,17 @@
 #include <stdint.h>
 #include <wayland-client-core.h>
 
-jclass ClientDisplay_class;
-jfieldID ClientDisplay_native_ptr;
-
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_init_1jni(JNIEnv *env, jclass clazz) {
-	ClientDisplay_class = clazz;
-	ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
-}
-
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_connect_1name(JNIEnv *env, jobject obj, jstring name) {
+	jclass ClientDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/ClientDisplay");
+	jfieldID ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
+
 	const char *name_str;
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(display) {
-		printf("DISPLAY ALREADY CONNECTED!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Display already connected!");
 		return;
 	}
 
@@ -27,33 +22,51 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_connect_1n
 
 	display = wl_display_connect(name_str);
 
+	if(!display) {
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Failed to connect to display!");
+		return;
+	}
+
 	if(name) (*env)->ReleaseStringUTFChars(env, name, name_str);
 
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_connect_1fd(JNIEnv *env, jobject obj, jint fd) {
+	jclass ClientDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/ClientDisplay");
+	jfieldID ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(display) {
-		printf("DISPLAY ALREADY CONNECTED!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Display already connected!");
 		return;
 	}
 
 	display = wl_display_connect_to_fd((int) fd);
 
+	if(!display) {
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Failed to connect to display!");
+		return;
+	}
+
 	(*env)->SetLongField(env, obj, ClientDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_disconnect(JNIEnv *env, jobject obj) {
+	jclass ClientDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/ClientDisplay");
+	jfieldID ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY IS NOT CONNECTED!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -63,12 +76,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_disconnect
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_dispatch(JNIEnv *env, jobject obj) {
+	jclass ClientDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/ClientDisplay");
+	jfieldID ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY IS NOT CONNECTED!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -76,12 +92,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_dispatch(J
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_flush(JNIEnv *env, jobject obj) {
+	jclass ClientDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/ClientDisplay");
+	jfieldID ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY IS NOT CONNECTED!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -89,12 +108,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_flush(JNIE
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_client_ClientDisplay_roundtrip(JNIEnv *env, jobject obj) {
+	jclass ClientDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/ClientDisplay");
+	jfieldID ClientDisplay_native_ptr = (*env)->GetFieldID(env, ClientDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ClientDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY IS NOT CONNECTED!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
