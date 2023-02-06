@@ -10,7 +10,7 @@ import dev.fabillo.jwayland.protocol.client.WLRegistryProxy;
 import dev.fabillo.jwayland.protocol.client.WLRegistryProxy.WLRegistryProxyListener;
 import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1Proxy;
 
-public class JWaylandExample {
+public class JWaylandBasicSnippet {
 	
 	private static WPSinglePixelBufferManagerV1Proxy pix;
 
@@ -45,9 +45,7 @@ public class JWaylandExample {
 				if(iface.equals("wp_single_pixel_buffer_manager_v1")) {
 					WLProxy proxy = registry.bind(name, iface, version);
 					System.out.println("Global proxy: " + proxy);
-					if(proxy != null) {
-						pix = WPSinglePixelBufferManagerV1Proxy.fromProxy(proxy);
-					}
+					pix = (WPSinglePixelBufferManagerV1Proxy) proxy;
 				}
 			}
 		});

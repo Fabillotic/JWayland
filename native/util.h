@@ -161,36 +161,34 @@ static inline void arguments_to_java_server(JNIEnv *env, void *resource, const c
 	*r_sig = sig;
 }
 
-static inline char *get_camel_name(char *name) {
+static inline char *get_camel_name(char *dest, const char *name) {
 	int i, j, len, first_underscore;
-	char *out;
 
 	len = 0;
 	for(i = 0; name[i] != '\0'; i++) {
 		len += name[i] != '_';
 	}
 
-	out = malloc(len + 1);
 	first_underscore = 0;
 	j = 0;
 	for(i = 0; name[i] != '\0'; i++) {
 		if(name[i] != '_') {
 			if(i == 0) {
-				out[j++] = toupper(name[i]);
+				dest[j++] = toupper(name[i]);
 			}
 			else if(name[i - 1] == '_') {
 				first_underscore = 1;
-				if(i == 1) out[j++] = name[i];
-				else out[j++] = toupper(name[i]);
+				if(i == 1) dest[j++] = name[i];
+				else dest[j++] = toupper(name[i]);
 			}
 			else if(!first_underscore) {
-				out[j++] = toupper(name[i]);
+				dest[j++] = toupper(name[i]);
 			}
 			else {
-				out[j++] = name[i];
+				dest[j++] = name[i];
 			}
 		}
 	}
-	out[j++] = '\0';
-	return out;
+	dest[j++] = '\0';
+	return dest;
 }

@@ -388,6 +388,7 @@ def make_c_glue_proxy(iface):
     d += "#include <jni.h>\n"
     d += "#include <stdio.h>\n"
     d += "#include <stdint.h>\n"
+    d += "#include <string.h>\n"
     d += "#include <wayland-client-core.h>\n"
     d += '#include "interfaces.h"\n'
     d += '#include "util.h"\n'
@@ -437,7 +438,14 @@ def make_c_glue_proxy(iface):
                         d += f'\tjclass {iname}_class = (*env)->FindClass(env, "dev/fabillo/jwayland/protocol/client/{iname}");\n'
                         d += f'\tjfieldID {iname}_native_ptr = (*env)->GetFieldID(env, {iname}_class, "native_ptr", "J");\n'
                     else:
-                        iname = "WLProxy"
+                        iname = "InterfaceProxy"
+                        d += '\tchar c[200];\n'
+                        d += '\tc[0] = 0;\n'
+                        d += '\tstrcat(c, "dev/fabillo/jwayland/protocol/client/");\n'
+                        d += '\tget_camel_name(c + strlen(c), (*env)->GetStringUTFChars(env, interface_name, NULL));\n'
+                        d += '\tstrcat(c, "Proxy");\n'
+                        d += f'\tjclass {iname}_class = (*env)->FindClass(env, c);\n'
+                        d += f'\tjfieldID {iname}_native_ptr = (*env)->GetFieldID(env, {iname}_class, "native_ptr", "J");\n'
                     d += f'\tjmethodID {iname}_init = (*env)->GetMethodID(env, {iname}_class, "<init>", "()V");\n'
                     break
         d += '\n'

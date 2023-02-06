@@ -21,7 +21,7 @@ import dev.fabillo.jwayland.protocol.client.XDGToplevelProxy.XDGToplevelProxyLis
 import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy;
 import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy.XDGWmBaseProxyListener;
 
-public class JWaylandExample2 {
+public class JWaylandWindowExample {
 	
 	private static final boolean use_spb = true;
 	private static WLCompositorProxy compositor;
@@ -39,11 +39,11 @@ public class JWaylandExample2 {
 
 			@Override
 			public void global(WLRegistryProxy proxy, int name, String iface, int version) {
-				if(iface.equals("wl_compositor")) compositor = WLCompositorProxy.fromProxy(registry.bind(name, iface, version));
-				else if(iface.equals("xdg_wm_base")) wm_base = XDGWmBaseProxy.fromProxy(registry.bind(name, iface, version));
-				else if(iface.equals("wp_single_pixel_buffer_manager_v1")) spbm = WPSinglePixelBufferManagerV1Proxy.fromProxy(registry.bind(name, iface, version));
-				else if(iface.equals("wp_viewporter")) viewporter = WPViewporterProxy.fromProxy(registry.bind(name, iface, version));
-				else if(iface.equals("wl_shm")) shm = WLShmProxy.fromProxy(registry.bind(name, iface, version));
+				if(iface.equals("wl_compositor")) compositor = (WLCompositorProxy) registry.bind(name, iface, version);
+				else if(iface.equals("xdg_wm_base")) wm_base = (XDGWmBaseProxy) registry.bind(name, iface, version);
+				else if(iface.equals("wp_single_pixel_buffer_manager_v1")) spbm = (WPSinglePixelBufferManagerV1Proxy) registry.bind(name, iface, version);
+				else if(iface.equals("wp_viewporter")) viewporter = (WPViewporterProxy) registry.bind(name, iface, version);
+				else if(iface.equals("wl_shm")) shm = (WLShmProxy) registry.bind(name, iface, version);
 			}
 
 			@Override
