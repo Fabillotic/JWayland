@@ -7,31 +7,28 @@
 #include "util.h"
 #include "interfaces.h"
 
-jclass ServerDisplay_class;
-jfieldID ServerDisplay_native_ptr;
-
-JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_init_1jni(JNIEnv *env, jclass clazz) {
-	ServerDisplay_class = clazz;
-	ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
-}
-
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1native(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display = wl_display_create();
 	if(!display) {
-		printf("FAILED TO CREATE DISPLAY!\n");
-		fflush(stdout);
-		return;
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Failed to create display!");
 	}
 	(*env)->SetLongField(env, obj, ServerDisplay_native_ptr, (jlong)(intptr_t)display);
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_run(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -39,12 +36,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_run(JNIEnv
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_terminate(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -52,12 +52,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_terminate(
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_flush_1clients(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -65,12 +68,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_flush_1cli
 }
 
 JNIEXPORT jstring JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1socket_1auto(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return NULL;
 	}
 
@@ -78,12 +84,15 @@ JNIEXPORT jstring JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1so
 }
 
 JNIEXPORT jboolean JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1socket_1fd(JNIEnv *env, jobject obj, jint fd) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return JNI_FALSE;
 	}
 
@@ -91,12 +100,15 @@ JNIEXPORT jboolean JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1s
 }
 
 JNIEXPORT jboolean JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1socket(JNIEnv *env, jobject obj, jstring name) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return JNI_FALSE;
 	}
 
@@ -104,12 +116,15 @@ JNIEXPORT jboolean JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1s
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_destroy_1clients(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -117,12 +132,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_destroy_1c
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_destroy(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -130,12 +148,15 @@ JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_destroy(JN
 }
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_init_1shm(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
@@ -163,6 +184,8 @@ void global_bind(struct wl_client *client, void *data, uint32_t version, uint32_
 }
 
 JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1global(JNIEnv *env, jobject obj, jstring interface_name, jint version, jobject listener) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
 	jclass WLGlobal_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLGlobal");
 	jfieldID WLGlobal_native_ptr = (*env)->GetFieldID(env, WLGlobal_class, "native_ptr", "J");
 	jmethodID WLGlobal_init = (*env)->GetMethodID(env, WLGlobal_class, "<init>", "()V");
@@ -172,8 +195,8 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return NULL;
 	}
 	jobject listener_ref = (*env)->NewGlobalRef(env, listener);
@@ -217,6 +240,8 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 }
 
 JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_get_1event_1loop(JNIEnv *env, jobject obj) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
 	jclass WLEventLoop_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLEventLoop");
 	jfieldID WLEventLoop_native_ptr = (*env)->GetFieldID(env, WLEventLoop_class, "native_ptr", "J");
 	jmethodID WLEventLoop_init = (*env)->GetMethodID(env, WLEventLoop_class, "<init>", "()V");
@@ -225,8 +250,8 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_get_1ev
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return NULL;
 	}
 	struct wl_event_loop *wloop = wl_display_get_event_loop(display);
@@ -247,8 +272,8 @@ void on_client_create(struct wl_listener *listener, void *data) {
 	jmethodID WLClient_init = (*j_env)->GetMethodID(j_env, WLClient_class, "<init>", "()V");
 
 	if(!client_created_listener_obj) {
-		printf("ERROR: listener engaged even though no listener object is present!\n");
-		fflush(stdout);
+		jclass IOException_class = (*j_env)->FindClass(j_env, "java/io/IOException");
+		(*j_env)->ThrowNew(j_env, IOException_class, "Listener engaged even though no listener object is present!");
 		return;
 	}
 
@@ -262,18 +287,21 @@ struct wl_listener client_created_listener = {
 };
 
 JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_add_1client_1created_1listener(JNIEnv *env, jobject obj, jobject listener) {
+	jclass ServerDisplay_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/ServerDisplay");
+	jfieldID ServerDisplay_native_ptr = (*env)->GetFieldID(env, ServerDisplay_class, "native_ptr", "J");
+
 	struct wl_display *display;
 
 	display = (struct wl_display*)(intptr_t)(*env)->GetLongField(env, obj, ServerDisplay_native_ptr);
 	if(!display) {
-		printf("DISPLAY DOES NOT EXIST!\n");
-		fflush(stdout);
+		jclass IOException_class = (*env)->FindClass(env, "java/io/IOException");
+		(*env)->ThrowNew(env, IOException_class, "Invalid display!");
 		return;
 	}
 
 	if(client_created_listener_obj) {
-		printf("A CLIENT CREATION LISTENER WAS ALREADY REGISTERED!\n");
-		fflush(stdout);
+		jclass IllegalStateException_class = (*env)->FindClass(env, "java/lang/IllegalStateException");
+		(*env)->ThrowNew(env, IllegalStateException_class, "Client creation listener already registered!");
 		return;
 	}
 

@@ -13,13 +13,9 @@ public class ServerDisplay extends WLObject {
 	public static ServerDisplay create() {
 		ServerDisplay display = new ServerDisplay();
 		display.create_native();
-		if(display.getPointer() == 0) {
-			return null;
-		}
 		return display;
 	}
 	
-	private static native void init_jni();
 	private native void create_native();
 	
 	public native void run();
@@ -41,7 +37,6 @@ public class ServerDisplay extends WLObject {
 	
 	static {
 		JWayland.loadLibrary();
-		init_jni();
 	}
 	
 }
