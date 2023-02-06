@@ -34,7 +34,7 @@ $(SOURCE_JAR): $(JAVA)
 
 $(OBJ):
 
-scan: clean_protocols
+scan: clean_all
 	python3 scanner.py interfaces native/protocol $(PROTOCOLS)
 	python3 scanner.py client-jni-code $(NATIVE_PROTOCOL_CLIENT_DIR) $(PROTOCOLS)
 	python3 scanner.py server-jni-code $(NATIVE_PROTOCOL_SERVER_DIR) $(PROTOCOLS)
@@ -45,7 +45,9 @@ clean:
 	rm -f $(BIN) $(OBJ) $(JAR) $(NATIVE_JAR) $(SOURCE_JAR)
 	rm -rf classes
 
-clean_protocols: clean
+clean_all: clean
 	rm -f native/protocol/interfaces.c $(NATIVE_PROTOCOL_CLIENT_DIR)/*.c $(NATIVE_PROTOCOL_SERVER_DIR)/*.c $(JAVA_PROTOCOL_CLIENT_DIR)/*.java $(JAVA_PROTOCOL_SERVER_DIR)/*.java
 
-.PHONY: all scan clean clean_protocols
+clean-all: clean_all
+
+.PHONY: all scan clean clean_all clean-all
