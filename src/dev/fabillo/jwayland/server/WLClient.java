@@ -1,5 +1,6 @@
 package dev.fabillo.jwayland.server;
 
+import dev.fabillo.jwayland.JWayland;
 import dev.fabillo.jwayland.WLObject;
 
 public class WLClient extends WLObject {
@@ -10,6 +11,8 @@ public class WLClient extends WLObject {
 	public WLClient(long native_ptr) {
 		super(native_ptr);
 	}
+	
+	public native void addDestroyListener(WLClientDestroyedListener listener);
 	
 	@Override
 	public String toString() {
@@ -32,8 +35,12 @@ public class WLClient extends WLObject {
 	
 	public static interface WLClientDestroyedListener {
 		
-		public void client_destroyed();
+		public void client_destroyed(WLClient client);
 		
+	}
+	
+	static {
+		JWayland.loadLibrary();
 	}
 
 }

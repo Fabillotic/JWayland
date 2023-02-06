@@ -21,10 +21,10 @@ public class JWaylandExample {
 		System.out.println("display: " + display);
 		WLCallbackProxy c = display.sync();
 		System.out.println(c);
-		c.addListener(new WLCallbackProxyListener() {
+		c.setListener(new WLCallbackProxyListener() {
 			
 			@Override
-			public void done(int callback_data) {
+			public void done(WLCallbackProxy callback, int callback_data) {
 				System.out.println("Sync done!!!!");
 			}
 		});
@@ -32,15 +32,15 @@ public class JWaylandExample {
 		
 		WLRegistryProxy registry = display.get_registry();
 		System.out.println("registry: " + registry);
-		registry.addListener(new WLRegistryProxyListener() {
+		registry.setListener(new WLRegistryProxyListener() {
 			
 			@Override
-			public void global_remove(int name) {
+			public void global_remove(WLRegistryProxy proxy, int name) {
 				
 			}
 			
 			@Override
-			public void global(int name, String iface, int version) {
+			public void global(WLRegistryProxy registry, int name, String iface, int version) {
 				System.out.println("Global! name: " + name + ", interface: " + iface + ", version: " + version);
 				if(iface.equals("wp_single_pixel_buffer_manager_v1")) {
 					WLProxy proxy = registry.bind(name, iface, version);

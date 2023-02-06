@@ -166,7 +166,7 @@ def make_java_proxy(iface):
     d += "\t}\n"
     d += "\t\n"
     d += "\t@ProxyListener\n"
-    d += f"\tpublic native void addListener({lname} listener);\n"
+    d += f"\tpublic native void setListener({lname} listener);\n"
     d += "\t\n"
     for n, req in enumerate(iface["requests"]):
         if n > 0:
@@ -215,12 +215,11 @@ def make_java_proxy(iface):
     for n, ev in enumerate(iface["events"]):
         if n > 0:
             d += "\t\t\n"
-        sig = "("
+        sig = f"(Ldev/fabillo/jwayland/protocol/client/{cname};"
         d += "\t\t@WLEvent\n"
-        d += f"\t\tpublic void {ev['name']}("
+        d += f"\t\tpublic void {ev['name']}({cname} proxy"
         for n, arg in enumerate(ev["args"]):
-            if n > 0:
-                d += ", "
+            d += ", "
             if arg["type"] in ["int", "uint", "fd"]:
                 d += "int "
                 sig += "I"
@@ -283,7 +282,7 @@ def make_java_resource(iface):
     d += "\t}\n"
     d += "\t\n"
     d += "\t@ResourceListener\n"
-    d += f"\tpublic native void addListener({lname} listener);\n"
+    d += f"\tpublic native void setListener({lname} listener);\n"
     d += "\t\n"
     for n, ev in enumerate(iface["events"]):
         if n > 0:
@@ -319,12 +318,11 @@ def make_java_resource(iface):
     for n, req in enumerate(iface["requests"]):
         if n > 0:
             d += "\t\t\n"
-        sig = "("
+        sig = f"(Ldev/fabillo/jwayland/protocol/server/{cname};"
         d += "\t\t@WLRequest\n"
-        d += f"\t\tpublic void {req['name']}("
+        d += f"\t\tpublic void {req['name']}({cname} resource"
         for n, arg in enumerate(req["args"]):
-            if n > 0:
-                d += ", "
+            d += ", "
             if arg["type"] in ["int", "uint", "fd", "new_id"]:
                 d += "int "
                 sig += "I"
@@ -499,13 +497,13 @@ def make_c_glue_proxy(iface):
     for ev in iface["events"]:
         d += '\tjmethodID mListener_' + ev["name"] + ' = '
         d += '(*env)->GetMethodID(env, listener_class, "' + ev["name"] + '", '
-        d += '"' + ev["signature"] + '");\n'
+        d += f'"' + ev["signature"] + '");\n'
 
     d += '\n'
     d += '\tjvalue *values;\n'
     d += '\tchar *sig;\n'
     d += '\n'
-    d += '\targuments_to_java_client(env, msg, args, &sig, &values);\n'
+    d += f'\targuments_to_java_client(env, proxy, "dev/fabillo/jwayland/protocol/client/{cname}", msg, args, &sig, &values);\n'
 
     d += '\tswitch(opcode) {\n'
 
@@ -523,7 +521,7 @@ def make_c_glue_proxy(iface):
 
     d += 'JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_protocol_client_'
     d += cname
-    d += '_addListener(JNIEnv *env, jobject obj, jobject listener) {\n'
+    d += '_setListener(JNIEnv *env, jobject obj, jobject listener) {\n'
     d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");\n'
     d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
     d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
@@ -620,13 +618,13 @@ def make_c_glue_resource(iface):
     for req in iface["requests"]:
         d += '\tjmethodID mListener_' + req["name"] + ' = '
         d += '(*env)->GetMethodID(env, listener_class, "' + req["name"] + '", '
-        d += '"' + req["signature"] + '");\n'
+        d += f'"' + req["signature"] + '");\n'
 
     d += '\n'
     d += '\tjvalue *values;\n'
     d += '\tchar *sig;\n'
     d += '\n'
-    d += '\targuments_to_java_server(env, msg, args, &sig, &values);\n'
+    d += f'\targuments_to_java_server(env, resource, "dev/fabillo/jwayland/protocol/server/{cname}", msg, args, &sig, &values);\n'
 
     d += '\tswitch(opcode) {\n'
 
@@ -644,7 +642,7 @@ def make_c_glue_resource(iface):
 
     d += 'JNIEXPORT void JNICALL Java_dev_fabillo_jwayland_protocol_server_'
     d += cname
-    d += '_addListener(JNIEnv *env, jobject obj, jobject listener) {\n'
+    d += '_setListener(JNIEnv *env, jobject obj, jobject listener) {\n'
     d += '\tjclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");\n'
     d += '\tjfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");\n'
     d += '\tjmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");\n'

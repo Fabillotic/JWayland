@@ -57,42 +57,42 @@ public class JWaylandServerExample extends JPanel {
 				System.out.println("Client attempted to bind wl_compositor!");
 				WLResource compositor_resource = display.create_resource(client, "wl_compositor", version, id);
 				WLCompositorResource compositor = WLCompositorResource.fromResource(compositor_resource);
-				compositor.addListener(new WLCompositorResourceListener() {
+				compositor.setListener(new WLCompositorResourceListener() {
 					
 					@Override
-					public void create_surface(int id) {
+					public void create_surface(WLCompositorResource compositor, int id) {
 						System.out.println("CREATE SURFACE!");
 						WLResource surface_resource = display.create_resource(client, "wl_surface", 5, id);
 						WLSurfaceResource surface = WLSurfaceResource.fromResource(surface_resource);
-						surface.addListener(new WLSurfaceResourceListener() {
+						surface.setListener(new WLSurfaceResourceListener() {
 							
 							@Override
-							public void set_opaque_region(WLResource region) {
+							public void set_opaque_region(WLSurfaceResource surface, WLResource region) {
 								
 							}
 							
 							@Override
-							public void set_input_region(WLResource region) {
+							public void set_input_region(WLSurfaceResource surface, WLResource region) {
 								
 							}
 							
 							@Override
-							public void set_buffer_transform(int transform) {
+							public void set_buffer_transform(WLSurfaceResource surface, int transform) {
 								
 							}
 							
 							@Override
-							public void set_buffer_scale(int scale) {
+							public void set_buffer_scale(WLSurfaceResource surface, int scale) {
 								
 							}
 							
 							@Override
-							public void offset(int x, int y) {
+							public void offset(WLSurfaceResource surface, int x, int y) {
 								
 							}
 							
 							@Override
-							public void frame(int callback_id) {
+							public void frame(WLSurfaceResource surface, int callback_id) {
 								System.out.println("Surface frame!");
 								WLResource callback_resource = display.create_resource(client, "wl_callback", 1, callback_id);
 								WLCallbackResource callback = WLCallbackResource.fromResource(callback_resource);
@@ -100,27 +100,27 @@ public class JWaylandServerExample extends JPanel {
 							}
 							
 							@Override
-							public void destroy() {
+							public void destroy(WLSurfaceResource surface) {
 								
 							}
 							
 							@Override
-							public void damage_buffer(int x, int y, int width, int height) {
+							public void damage_buffer(WLSurfaceResource surface, int x, int y, int width, int height) {
 								
 							}
 							
 							@Override
-							public void damage(int x, int y, int width, int height) {
+							public void damage(WLSurfaceResource surface, int x, int y, int width, int height) {
 								
 							}
 							
 							@Override
-							public void commit() {
+							public void commit(WLSurfaceResource surface) {
 								System.out.println("Surface commit!");
 							}
 							
 							@Override
-							public void attach(WLResource buffer_resource, int x, int y) {
+							public void attach(WLSurfaceResource surface, WLResource buffer_resource, int x, int y) {
 								WLBufferResource buffer = WLBufferResource.fromResource(buffer_resource);
 								System.out.println("Attach: " + buffer);
 								WLShmBuffer shm_buffer = WLShmBuffer.get(buffer);
@@ -145,7 +145,7 @@ public class JWaylandServerExample extends JPanel {
 					}
 					
 					@Override
-					public void create_region(int id) {
+					public void create_region(WLCompositorResource compositor, int id) {
 						
 					}
 				});

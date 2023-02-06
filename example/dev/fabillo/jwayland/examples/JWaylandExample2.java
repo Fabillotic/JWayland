@@ -35,20 +35,19 @@ public class JWaylandExample2 {
 		WLDisplayProxy display = client_display.getProxy();
 		
 		WLRegistryProxy registry = display.get_registry();
-		registry.addListener(new WLRegistryProxyListener() {
-			
+		registry.setListener(new WLRegistryProxyListener() {
+
 			@Override
-			public void global_remove(int arg0) {
-				
+			public void global(WLRegistryProxy proxy, int name, String iface, int version) {
+				if(iface.equals("wl_compositor")) compositor = WLCompositorProxy.fromProxy(registry.bind(name, iface, version));
+				else if(iface.equals("xdg_wm_base")) wm_base = XDGWmBaseProxy.fromProxy(registry.bind(name, iface, version));
+				else if(iface.equals("wp_single_pixel_buffer_manager_v1")) spbm = WPSinglePixelBufferManagerV1Proxy.fromProxy(registry.bind(name, iface, version));
+				else if(iface.equals("wp_viewporter")) viewporter = WPViewporterProxy.fromProxy(registry.bind(name, iface, version));
+				else if(iface.equals("wl_shm")) shm = WLShmProxy.fromProxy(registry.bind(name, iface, version));
 			}
-			
+
 			@Override
-			public void global(int arg0, String arg1, int arg2) {
-				if(arg1.equals("wl_compositor")) compositor = WLCompositorProxy.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("xdg_wm_base")) wm_base = XDGWmBaseProxy.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("wp_single_pixel_buffer_manager_v1")) spbm = WPSinglePixelBufferManagerV1Proxy.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("wp_viewporter")) viewporter = WPViewporterProxy.fromProxy(registry.bind(arg0, arg1, arg2));
-				else if(arg1.equals("wl_shm")) shm = WLShmProxy.fromProxy(registry.bind(arg0, arg1, arg2));
+			public void global_remove(WLRegistryProxy proxy, int name) {
 			}
 		});
 		
@@ -79,12 +78,12 @@ public class JWaylandExample2 {
 			}
 		}
 		
-		wm_base.addListener(new XDGWmBaseProxyListener() {
-			
+		wm_base.setListener(new XDGWmBaseProxyListener() {
+
 			@Override
-			public void ping(int arg0) {
+			public void ping(XDGWmBaseProxy proxy, int serial) {
 				System.out.println("PING");
-				wm_base.pong(arg0);
+				wm_base.pong(serial);
 			}
 		});
 		
@@ -94,39 +93,37 @@ public class JWaylandExample2 {
 		System.out.println("window: " + window);
 		XDGToplevelProxy toplevel = window.get_toplevel();
 		
-		window.addListener(new XDGSurfaceProxyListener() {
-			
+		window.setListener(new XDGSurfaceProxyListener() {
+
 			@Override
-			public void configure(int arg0) {
+			public void configure(XDGSurfaceProxy proxy, int serial) {
 				System.out.println("XDG CONFIGURE!");
-				window.ack_configure(arg0);
+				window.ack_configure(serial);
 			}
 		});
 		
 		toplevel.set_title("TRANS RIGHTS");
-		toplevel.addListener(new XDGToplevelProxyListener() {
-			
+		toplevel.setListener(new XDGToplevelProxyListener() {
+
 			@Override
-			public void wm_capabilities(long arg0) {
-				
-			}
-			
-			@Override
-			public void configure_bounds(int arg0, int arg1) {
-				
-			}
-			
-			@Override
-			public void configure(int arg0, int arg1, long arg2) {
+			public void configure(XDGToplevelProxy proxy, int width, int height, long states) {
 				System.out.println("TOPLEVEL CONFIGURE!");
-				if(arg0 > 0 && arg1 > 0) {
+				if(width > 0 && height > 0) {
 					window.ack_configure(0);
 				}
 			}
-			
+
 			@Override
-			public void close() {
+			public void close(XDGToplevelProxy proxy) {
 				System.exit(0);
+			}
+
+			@Override
+			public void configure_bounds(XDGToplevelProxy proxy, int width, int height) {
+			}
+
+			@Override
+			public void wm_capabilities(XDGToplevelProxy proxy, long capabilities) {
 			}
 		});
 		
