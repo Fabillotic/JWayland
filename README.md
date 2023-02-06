@@ -18,6 +18,13 @@ You may run into SEGFAULTs, please report them.
 - Apache ant
 - Wayland
 
+## Releases
+The releases provide you pre-scanned and compiled versions of the library.
+
+The extensions are the most recent wayland-protocols.
+
+In the case that multiple versions of an extension are available, the most stable option is chosen.
+
 ## Compiling
 1. Copy the required protocol xml files (including the core `wayland.xml`!) to `protocols/`
 2. Run `make scan` to generate all of the protocol-specific code
