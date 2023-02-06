@@ -1,7 +1,9 @@
 # JWayland
 ### Wayland JNI bindings for Java
 
-Note: This library is still experimental. It works when it works, but don't expect proper error handling yet
+Note: This library is still experimental.
+Breaking changes will happen.
+You may run into SEGFAULTs, please report them.
 
 ## Features
 - Client + Server bindings
