@@ -558,7 +558,6 @@ def make_c_glue_proxy(iface):
     d += '_setListener(JNIEnv *env, jobject obj, jobject listener) {\n'
     d += '\tjclass WLProxy_class = (*env)->FindClass(env, "dev/fabillo/jwayland/client/WLProxy");\n'
     d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
-    d += '\tjmethodID WLProxy_init = (*env)->GetMethodID(env, WLProxy_class, "<init>", "()V");\n'
     d += "\n"
     d += "\tjobject listener_ref = (*env)->NewGlobalRef(env, listener);\n"
     d += "\n"
@@ -679,7 +678,6 @@ def make_c_glue_resource(iface):
     d += '_setListener(JNIEnv *env, jobject obj, jobject listener) {\n'
     d += '\tjclass WLResource_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLResource");\n'
     d += '\tjfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");\n'
-    d += '\tjmethodID WLResource_init = (*env)->GetMethodID(env, WLResource_class, "<init>", "()V");\n'
     d += "\n"
     d += "\tjobject listener_ref = (*env)->NewGlobalRef(env, listener);\n"
     d += "\n"
