@@ -20,7 +20,7 @@ endif
 
 all: $(JAR) $(NATIVE_JAR) $(SOURCE_JAR)
 
-$(JAR): $(BIN) $(JAVA)
+$(JAR): $(JAVA)
 	ant jar
 
 $(BIN): $(OBJ) $(PROTOCOL_OBJ)
