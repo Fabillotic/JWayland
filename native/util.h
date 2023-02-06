@@ -60,12 +60,16 @@ static inline void arguments_to_java_client(JNIEnv *env, void *proxy, const char
 			n++;
 		}
 		else if(c == 's') {
-			values[n].l = (jobject) (*env)->NewStringUTF(env, args[n-1].s);
+			if(args[n-1].s) values[n].l = (jobject) (*env)->NewStringUTF(env, args[n-1].s);
+			else values[n].l = NULL;
 			n++;
 		}
 		else if(c == 'o') {
-			values[n].l = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
-			(*env)->SetLongField(env, values[n].l, WLProxy_native_ptr, (jlong)(intptr_t)args[n-1].o);
+			if(args[n-1].o) {
+				values[n].l = (*env)->NewObject(env, WLProxy_class, WLProxy_init);
+				(*env)->SetLongField(env, values[n].l, WLProxy_native_ptr, (jlong)(intptr_t)args[n-1].o);
+			}
+			else values[n].l = NULL;
 			n++;
 		}
 		else if(c == 'f') {
@@ -135,12 +139,16 @@ static inline void arguments_to_java_server(JNIEnv *env, void *resource, const c
 			n++;
 		}
 		else if(c == 's') {
-			values[n].l = (jobject) (*env)->NewStringUTF(env, args[n-1].s);
+			if(args[n-1].s) values[n].l = (jobject) (*env)->NewStringUTF(env, args[n-1].s);
+			else values[n].l = NULL;
 			n++;
 		}
 		else if(c == 'o') {
-			values[n].l = (*env)->NewObject(env, WLResource_class, WLResource_init);
-			(*env)->SetLongField(env, values[n].l, WLResource_native_ptr, (jlong)(intptr_t)args[n-1].o);
+			if(args[n-1].o) {
+				values[n].l = (*env)->NewObject(env, WLResource_class, WLResource_init);
+				(*env)->SetLongField(env, values[n].l, WLResource_native_ptr, (jlong)(intptr_t)args[n-1].o);
+			}
+			else values[n].l = NULL;
 			n++;
 		}
 		else if(c == 'f') {

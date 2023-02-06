@@ -123,23 +123,29 @@ public class JWaylandServerExample extends JPanel {
 							public void attach(WLSurfaceResource surface, WLResource buffer_resource, int x, int y) {
 								WLBufferResource buffer = WLBufferResource.fromResource(buffer_resource);
 								System.out.println("Attach: " + buffer);
-								WLShmBuffer shm_buffer = WLShmBuffer.get(buffer);
-								int w = shm_buffer.get_width();
-								int h = shm_buffer.get_height();
-								int s = shm_buffer.get_stride();
-								System.out.println(shm_buffer + ", " + w + ", " + h);
-								byte data[] = new byte[s * h];
-								shm_buffer.get_data().get(data);
-								
-								BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
-								byte[] imgdata = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-								for(int i = 0; i < w * h; i++) {
-									imgdata[i * 4 + 1] = data[i * 4 + 0];
-									imgdata[i * 4 + 2] = data[i * 4 + 1];
-									imgdata[i * 4 + 3] = data[i * 4 + 2];
-									imgdata[i * 4 + 0] = data[i * 4 + 3];
+								if(buffer != null) {
+									WLShmBuffer shm_buffer = WLShmBuffer.get(buffer);
+									int w = shm_buffer.get_width();
+									int h = shm_buffer.get_height();
+									int s = shm_buffer.get_stride();
+									System.out.println(shm_buffer + ", " + w + ", " + h);
+									byte data[] = new byte[s * h];
+									shm_buffer.get_data().get(data);
+									
+									BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+									byte[] imgdata = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+									for(int i = 0; i < w * h; i++) {
+										imgdata[i * 4 + 1] = data[i * 4 + 0];
+										imgdata[i * 4 + 2] = data[i * 4 + 1];
+										imgdata[i * 4 + 3] = data[i * 4 + 2];
+										imgdata[i * 4 + 0] = data[i * 4 + 3];
+									}
+									imageMap.put(client, image);
 								}
-								imageMap.put(client, image);
+								else {
+									System.out.println("Received empty buffer!");
+									imageMap.put(client, null);
+								}
 							}
 						});
 					}
@@ -190,7 +196,7 @@ public class JWaylandServerExample extends JPanel {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, 1000, 750);
 		for(BufferedImage image : imageMap.values()) {
-			g.drawImage(image, 0, 0, null);
+			if(image != null) g.drawImage(image, 0, 0, null);
 		}
 	}
 

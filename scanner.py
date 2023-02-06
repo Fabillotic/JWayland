@@ -103,6 +103,10 @@ def parse_interface(interface):
             a = {"name": arg.attrib["name"], "type": arg.attrib["type"]}
             if "interface" in arg.attrib:
                 a["interface"] = arg.attrib["interface"]
+            if "allow-null" in arg.attrib and arg.attrib["allow-null"] == "true":
+                a["nullable"] = True
+            else:
+                a["nullable"] = False
             t["args"].append(a)
         t["return_proxy"] = False
         t["sun"] = False
@@ -117,7 +121,7 @@ def parse_interface(interface):
                 #A new_id without a specified interface should be prefixed with a string and uint specifing the name and type of the interface
                 #That's why I call it a 'sun' for the wl_message signature it generates
                 if not "interface" in arg:
-                    t["args"] = t["args"][:n] + [{"name": "interface_name", "type": "string"}, {"name": "interface_version", "type": "uint"}] + t["args"][n:]
+                    t["args"] = t["args"][:n] + [{"name": "interface_name", "type": "string", "nullable": False}, {"name": "interface_version", "type": "uint", "nullable": False}] + t["args"][n:]
                     t["sun"] = True
         #Check for duplicate names
         for n, arg in enumerate(t["args"]):
@@ -133,6 +137,10 @@ def parse_interface(interface):
             a = {"name": arg.attrib["name"], "type": arg.attrib["type"]}
             if "interface" in arg.attrib:
                 a["interface"] = arg.attrib["interface"]
+            if "allow-null" in arg.attrib and arg.attrib["allow-null"] == "true":
+                a["nullable"] = True
+            else:
+                a["nullable"] = False
             t["args"].append(a)
         r["events"].append(t)
     return r
@@ -147,6 +155,7 @@ def make_java_proxy(iface):
     d += "import dev.fabillo.jwayland.WLFixed;\n"
     d += "import dev.fabillo.jwayland.client.WLProxy;\n"
     d += "import dev.fabillo.jwayland.annotation.ProxyListener;\n"
+    d += "import dev.fabillo.jwayland.annotation.WLNullable;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
     d += "import dev.fabillo.jwayland.annotation.WLRequest;\n"
     d += "\n"
@@ -196,8 +205,12 @@ def make_java_proxy(iface):
             elif arg["type"] == "uint":
                 d += "long "
             elif arg["type"] == "string":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "String "
             elif arg["type"] == "object":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "WLProxy "
             elif arg["type"] == "fixed":
                 d += "WLFixed "
@@ -224,9 +237,13 @@ def make_java_proxy(iface):
                 d += "int "
                 sig += "I"
             elif arg["type"] == "string":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "String "
                 sig += "Ljava/lang/String;"
             elif arg["type"] in ["object", "new_id"]:
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "WLProxy "
                 sig += "Ldev/fabillo/jwayland/client/WLProxy;"
             elif arg["type"] == "fixed":
@@ -263,6 +280,7 @@ def make_java_resource(iface):
     d += "import dev.fabillo.jwayland.WLFixed;\n"
     d += "import dev.fabillo.jwayland.server.WLResource;\n"
     d += "import dev.fabillo.jwayland.annotation.ResourceListener;\n"
+    d += "import dev.fabillo.jwayland.annotation.WLNullable;\n"
     d += "import dev.fabillo.jwayland.annotation.WLEvent;\n"
     d += "import dev.fabillo.jwayland.annotation.WLRequest;\n"
     d += "\n"
@@ -299,8 +317,12 @@ def make_java_resource(iface):
             elif arg["type"] == "uint":
                 d += "long "
             elif arg["type"] == "string":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "String "
             elif arg["type"] == "object":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "WLResource "
             elif arg["type"] == "fixed":
                 d += "WLFixed "
@@ -327,9 +349,13 @@ def make_java_resource(iface):
                 d += "int "
                 sig += "I"
             elif arg["type"] == "string":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "String "
                 sig += "Ljava/lang/String;"
             elif arg["type"] == "object":
+                if arg["nullable"]:
+                    d += "@WLNullable "
                 d += "WLResource "
                 sig += "Ldev/fabillo/jwayland/server/WLResource;"
             elif arg["type"] == "fixed":
@@ -444,7 +470,7 @@ def make_c_glue_proxy(iface):
                 elif arg["type"] == "string":
                     d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
                 elif arg["type"] == "object":
-                    d += '(struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr)'
+                    d += '(' + sanitize_name(arg["name"]) + ' ? (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr) : NULL)'
                 elif arg["type"] == "fixed":
                     d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
                 elif arg["type"] == "array":
@@ -471,7 +497,7 @@ def make_c_glue_proxy(iface):
                 elif arg["type"] == "string":
                     d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
                 elif arg["type"] == "object":
-                    d += '(struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr)'
+                    d += '(' + sanitize_name(arg["name"]) + ' ? (struct wl_proxy*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLProxy_native_ptr) : NULL)'
                 elif arg["type"] == "fixed":
                     d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
                 elif arg["type"] == "array":
@@ -592,7 +618,7 @@ def make_c_glue_resource(iface):
             elif arg["type"] == "string":
                 d += '(*env)->GetStringUTFChars(env, ' + sanitize_name(arg["name"]) + ', NULL)'
             elif arg["type"] == "object":
-                d += '(struct wl_resource*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLResource_native_ptr)'
+                d += '(' + sanitize_name(arg["name"]) + ' ? (struct wl_resource*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLResource_native_ptr) : NULL)'
             elif arg["type"] == "fixed":
                 d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
             elif arg["type"] == "array":
@@ -707,8 +733,12 @@ def make_interface_definition(iface):
             elif arg["type"] == "fixed":
                 d += 'f'
             elif arg["type"] == "string":
+                if arg["nullable"]:
+                    d += "?"
                 d += 's'
             elif arg["type"] == "object":
+                if arg["nullable"]:
+                    d += "?"
                 d += 'o'
             elif arg["type"] == "new_id":
                 d += 'n'
@@ -751,8 +781,12 @@ def make_interface_definition(iface):
             elif arg["type"] == "fixed":
                 d += 'f'
             elif arg["type"] == "string":
+                if arg["nullable"]:
+                    d += "?"
                 d += 's'
             elif arg["type"] == "object":
+                if arg["nullable"]:
+                    d += "?"
                 d += 'o'
             elif arg["type"] == "new_id":
                 d += 'n'
