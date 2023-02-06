@@ -212,6 +212,10 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 	return global;
 }
 
+int default_dispatcher(const void *user_data, void *target, uint32_t opcode, const struct wl_message *msg, union wl_argument *args) {
+	return 0;
+}
+
 JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_1resource(JNIEnv *env, jobject obj, jobject client, jstring interface_name, jint version, jint id) {
 	jclass WLClient_class = (*env)->FindClass(env, "dev/fabillo/jwayland/server/WLClient");
 	jfieldID WLClient_native_ptr = (*env)->GetFieldID(env, WLClient_class, "native_ptr", "J");
@@ -233,6 +237,8 @@ JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_server_ServerDisplay_create_
 
 	struct wl_resource *r = wl_resource_create(cl, inf, (int) version, (uint32_t) id);
 	if(!r) return NULL;
+
+	wl_resource_set_dispatcher(r, default_dispatcher, NULL, NULL, NULL);
 
 	jobject resource = (*env)->NewObject(env, InterfaceResource_class, InterfaceResource_init);
 	(*env)->SetLongField(env, resource, InterfaceResource_native_ptr, (jlong)(intptr_t)r);
