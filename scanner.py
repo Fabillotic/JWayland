@@ -445,6 +445,12 @@ def make_c_glue_proxy(iface):
                         d += '\tget_camel_name(c + strlen(c), (*env)->GetStringUTFChars(env, interface_name, NULL));\n'
                         d += '\tstrcat(c, "Proxy");\n'
                         d += f'\tjclass {iname}_class = (*env)->FindClass(env, c);\n'
+                        d += f'\tif(!{iname}_class || (*env)->ExceptionCheck(env))' + ' {\n'
+                        d += '\t\t(*env)->ExceptionClear(env);\n'
+                        d += '\t\tjclass InterfaceNotFoundException_class = (*env)->FindClass(env, "dev/fabillo/jwayland/InterfaceNotFoundException");\n'
+                        d += '\t\t(*env)->ThrowNew(env, InterfaceNotFoundException_class, (*env)->GetStringUTFChars(env, interface_name, NULL));\n'
+                        d += '\t\treturn NULL;\n'
+                        d += '\t}\n'
                         d += f'\tjfieldID {iname}_native_ptr = (*env)->GetFieldID(env, {iname}_class, "native_ptr", "J");\n'
                     d += f'\tjmethodID {iname}_init = (*env)->GetMethodID(env, {iname}_class, "<init>", "()V");\n'
                     break
