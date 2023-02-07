@@ -49,7 +49,10 @@ if __name__ == "__main__":
         print("No protocols found!")
         exit()
 
-    print("The following selection is a space-seperated list of indexes (e.g. '1 5 3') and both-inclusive ranges (e.g. '5-10').\nNo protocols are selected by default.\nThe tokens are evaluated in the order they appear.\n'^' inverts the selection, '*' means everything")
+    print("The following selection is a space-seperated list of indexes (e.g. '1 5 3') and both-inclusive ranges (e.g. '5-10').")
+    print("No protocols are selected by default.")
+    print("The tokens are evaluated in the order they appear.")
+    print("'^' inverts the selection, '*' means everything")
     s = input("Select protocols: ")
 
     if s == "":
