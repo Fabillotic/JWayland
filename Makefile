@@ -34,6 +34,9 @@ $(SOURCE_JAR): $(JAVA)
 
 $(OBJ):
 
+protocols:
+	python3 find_extensions.py
+
 scan: clean_all
 	python3 scanner.py interfaces native/protocol $(PROTOCOLS)
 	python3 scanner.py client-jni-code $(NATIVE_PROTOCOL_CLIENT_DIR) $(PROTOCOLS)
@@ -50,4 +53,4 @@ clean_all: clean
 
 clean-all: clean_all
 
-.PHONY: all scan clean clean_all clean-all
+.PHONY: all protocols scan clean clean_all clean-all
