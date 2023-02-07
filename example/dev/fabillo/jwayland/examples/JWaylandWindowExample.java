@@ -5,7 +5,6 @@ import dev.fabillo.jwayland.client.ClientDisplay;
 import dev.fabillo.jwayland.client.SimpleShmPool;
 import dev.fabillo.jwayland.protocol.client.WLBufferProxy;
 import dev.fabillo.jwayland.protocol.client.WLCompositorProxy;
-import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
 import dev.fabillo.jwayland.protocol.client.WLRegistryProxy;
 import dev.fabillo.jwayland.protocol.client.WLRegistryProxy.WLRegistryProxyListener;
 import dev.fabillo.jwayland.protocol.client.WLShmPoolProxy;
@@ -31,9 +30,7 @@ public class JWaylandWindowExample {
 	private static WLShmProxy shm;
 	
 	public static void main(String[] args) {
-		ClientDisplay client_display = ClientDisplay.connect(null);
-		WLDisplayProxy display = client_display.getProxy();
-		
+		ClientDisplay display = ClientDisplay.connect(null);
 		WLRegistryProxy registry = display.get_registry();
 		registry.setListener(new WLRegistryProxyListener() {
 
@@ -51,29 +48,29 @@ public class JWaylandWindowExample {
 			}
 		});
 		
-		client_display.roundtrip();
+		display.roundtrip();
 		
 		if(compositor == null) {
 			System.out.println("Didn't receive compositor!");
-			client_display.disconnect();
+			display.disconnect();
 			return;
 		}
 
 		if(wm_base == null) {
 			System.out.println("Didn't receive wm_base!");
-			client_display.disconnect();
+			display.disconnect();
 			return;
 		}
 		
 		if(use_spb) {
 			if(spbm == null) {
 				System.out.println("Didn't receive spbm!");
-				client_display.disconnect();
+				display.disconnect();
 				return;
 			}
 			if(viewporter == null) {
 				System.out.println("Didn't receive viewporter!");
-				client_display.disconnect();
+				display.disconnect();
 				return;
 			}
 		}
@@ -133,7 +130,7 @@ public class JWaylandWindowExample {
 		
 		while(true) {
 			System.out.println("DISPATCH!");
-			client_display.dispatch();
+			display.dispatch();
 			if(!first_dispatch) {
 				first_dispatch = true;
 				WLBufferProxy buf;

@@ -1,10 +1,9 @@
 package dev.fabillo.jwayland.client;
 
 import dev.fabillo.jwayland.JWayland;
-import dev.fabillo.jwayland.WLObject;
 import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
 
-public class ClientDisplay extends WLObject {
+public class ClientDisplay extends WLDisplayProxy {
 	
 	private ClientDisplay() {
 	}
@@ -23,11 +22,6 @@ public class ClientDisplay extends WLObject {
 	
 	private native void connect_name(String name);
 	private native void connect_fd(int fd);
-	
-	public WLDisplayProxy getProxy() {
-		WLDisplayProxy display = new WLDisplayProxy(getPointer());
-		return display;
-	}
 	
 	public native void disconnect();
 	public native void dispatch();

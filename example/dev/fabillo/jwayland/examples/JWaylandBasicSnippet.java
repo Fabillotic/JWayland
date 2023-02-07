@@ -5,7 +5,6 @@ import dev.fabillo.jwayland.client.WLProxy;
 import dev.fabillo.jwayland.protocol.client.WLBufferProxy;
 import dev.fabillo.jwayland.protocol.client.WLCallbackProxy;
 import dev.fabillo.jwayland.protocol.client.WLCallbackProxy.WLCallbackProxyListener;
-import dev.fabillo.jwayland.protocol.client.WLDisplayProxy;
 import dev.fabillo.jwayland.protocol.client.WLRegistryProxy;
 import dev.fabillo.jwayland.protocol.client.WLRegistryProxy.WLRegistryProxyListener;
 import dev.fabillo.jwayland.protocol.client.WPSinglePixelBufferManagerV1Proxy;
@@ -15,9 +14,7 @@ public class JWaylandBasicSnippet {
 	private static WPSinglePixelBufferManagerV1Proxy pix;
 
 	public static void main(String[] args) {
-		ClientDisplay connection = ClientDisplay.connect(null);
-		
-		WLDisplayProxy display = connection.getProxy();
+		ClientDisplay display = ClientDisplay.connect(null);
 		System.out.println("display: " + display);
 		WLCallbackProxy c = display.sync();
 		System.out.println(c);
@@ -49,7 +46,7 @@ public class JWaylandBasicSnippet {
 				}
 			}
 		});
-		connection.roundtrip();
+		display.roundtrip();
 		
 		WLBufferProxy buf = pix.create_u32_rgba_buffer(127, 127, 127, 127);
 		System.out.println("BUFFER CREATED: " + buf);
@@ -58,7 +55,7 @@ public class JWaylandBasicSnippet {
 		System.out.println("Buffer created and destroyed again!");
 		
 		while(true) {
-			connection.dispatch();
+			display.dispatch();
 		}
 	}
 
