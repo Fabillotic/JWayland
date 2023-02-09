@@ -19,6 +19,7 @@ import dev.fabillo.jwayland.protocol.server.WLSurfaceResource.WLSurfaceResourceL
 import dev.fabillo.jwayland.server.ServerDisplay;
 import dev.fabillo.jwayland.server.WLClient;
 import dev.fabillo.jwayland.server.WLClient.WLClientCreatedListener;
+import dev.fabillo.jwayland.server.WLClient.WLClientDestroyedListener;
 import dev.fabillo.jwayland.server.WLEventLoop;
 import dev.fabillo.jwayland.server.WLGlobal;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
@@ -32,6 +33,7 @@ public class JWaylandServerExample extends JPanel {
 	
 	private JFrame frame;
 	private HashMap<WLClient, BufferedImage> imageMap = new HashMap<>();
+	private HashMap<WLClient, ArrayList<WLCallbackResource>> callbacks = new HashMap<WLClient, ArrayList<WLCallbackResource>>();
 
 	public static void main(String[] args) {
 		JWaylandServerExample instance = new JWaylandServerExample();
@@ -48,8 +50,6 @@ public class JWaylandServerExample extends JPanel {
 		
 		ServerDisplay display = ServerDisplay.create();
 		System.out.println("Listening on '" + display.add_socket_auto() + "'...");
-		
-		ArrayList<WLCallbackResource> callbacks = new ArrayList<WLCallbackResource>();
 		
 		WLGlobal wl_compositor_global = display.create_global("wl_compositor", 5, new WLGlobalBindListener() {
 			
@@ -71,6 +71,8 @@ public class JWaylandServerExample extends JPanel {
 							@Override
 							public void resource_destroyed(WLResource resource) {
 								System.out.println("SURFACE DESTROYEDDDD :3");
+								
+								imageMap.remove(client);
 							}
 						});
 						
@@ -106,7 +108,7 @@ public class JWaylandServerExample extends JPanel {
 								System.out.println("Surface frame!");
 								WLResource callback_resource = display.create_resource(client, "wl_callback", 1, callback_id);
 								WLCallbackResource callback = WLCallbackResource.fromResource(callback_resource);
-								callbacks.add(callback);
+								callbacks.get(client).add(callback);
 							}
 							
 							@Override
@@ -177,6 +179,17 @@ public class JWaylandServerExample extends JPanel {
 			@Override
 			public void client_created(WLClient client) {
 				System.out.println("New client: " + client);
+				
+				callbacks.put(client, new ArrayList<>());
+				
+				client.addDestroyListener(new WLClientDestroyedListener() {
+					
+					@Override
+					public void client_destroyed(WLClient client) {
+						System.out.println("CLIENT DESTROYED: " + client);
+						callbacks.remove(client);
+					}
+				});
 			}
 		});
 		
@@ -189,10 +202,12 @@ public class JWaylandServerExample extends JPanel {
 			display.flush_clients();
 			loop.dispatch(0);
 			if(System.currentTimeMillis() - last >= 20) {
-				for(WLCallbackResource c : callbacks) {
-					c.done(System.currentTimeMillis());
+				for(WLClient client: callbacks.keySet()) {
+					for(WLCallbackResource c : callbacks.get(client)) {
+						c.done(System.currentTimeMillis());
+					}
+					callbacks.get(client).clear();
 				}
-				callbacks.clear();
 				this.repaint();
 				last = System.currentTimeMillis();
 			}
