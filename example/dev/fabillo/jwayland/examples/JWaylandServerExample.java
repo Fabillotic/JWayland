@@ -23,6 +23,7 @@ import dev.fabillo.jwayland.server.WLEventLoop;
 import dev.fabillo.jwayland.server.WLGlobal;
 import dev.fabillo.jwayland.server.WLGlobal.WLGlobalBindListener;
 import dev.fabillo.jwayland.server.WLResource;
+import dev.fabillo.jwayland.server.WLResource.WLResourceDestroyedListener;
 import dev.fabillo.jwayland.server.WLShmBuffer;
 
 public class JWaylandServerExample extends JPanel {
@@ -64,6 +65,15 @@ public class JWaylandServerExample extends JPanel {
 						System.out.println("CREATE SURFACE!");
 						WLResource surface_resource = display.create_resource(client, "wl_surface", 5, id);
 						WLSurfaceResource surface = WLSurfaceResource.fromResource(surface_resource);
+						
+						surface.addDestroyListener(new WLResourceDestroyedListener() {
+							
+							@Override
+							public void resource_destroyed(WLResource resource) {
+								System.out.println("SURFACE DESTROYEDDDD :3");
+							}
+						});
+						
 						surface.setListener(new WLSurfaceResourceListener() {
 							
 							@Override

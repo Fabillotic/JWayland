@@ -13,6 +13,7 @@ public class WLResource extends WLObject {
 	}
 	
 	public native WLClient get_client();
+	public native void addDestroyListener(WLResourceDestroyedListener listener);
 	
 	@Override
 	public String toString() {
@@ -25,6 +26,12 @@ public class WLResource extends WLObject {
 			if(((WLResource) obj).getPointer() == getPointer()) return true;
 		}
 		return false;
+	}
+	
+	public static interface WLResourceDestroyedListener {
+		
+		public void resource_destroyed(WLResource resource);
+		
 	}
 	
 	static {
