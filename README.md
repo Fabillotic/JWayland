@@ -1,7 +1,7 @@
 # JWayland
 ### Wayland JNI bindings for Java
 
-Note: This library is still experimental.
+Note: This library is still unstable.
 Breaking changes will happen.
 You may run into SEGFAULTs, please report them.
 
@@ -21,7 +21,7 @@ You may run into SEGFAULTs, please report them.
 ## Releases
 The releases provide you pre-scanned and compiled versions of the library.
 
-The extensions are the most recent wayland-protocols.
+The extensions are from the most recent release of [wayland-protocols](https://gitlab.freedesktop.org/wayland/wayland-protocols).
 
 In the case that multiple versions of an extension are available, the most stable option is chosen.
 
