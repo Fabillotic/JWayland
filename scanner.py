@@ -153,6 +153,7 @@ def make_java_proxy(iface):
     d += "\n"
     d += "import dev.fabillo.jwayland.JWayland;\n"
     d += "import dev.fabillo.jwayland.WLFixed;\n"
+    d += "import dev.fabillo.jwayland.WLArray;\n"
     d += "import dev.fabillo.jwayland.client.WLProxy;\n"
     d += "import dev.fabillo.jwayland.annotation.ProxyListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLNullable;\n"
@@ -215,7 +216,7 @@ def make_java_proxy(iface):
             elif arg["type"] == "fixed":
                 d += "WLFixed "
             elif arg["type"] == "array":
-                d += "long " #TODO: Placeholder, arrays unimplemented
+                d += "WLArray "
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -250,8 +251,8 @@ def make_java_proxy(iface):
                 d += "WLFixed "
                 sig += "Ldev/fabillo/jwayland/WLFixed;"
             elif arg["type"] == "array":
-                d += "long " #TODO: Placeholder, arrays unimplemented
-                sig += "J"
+                d += "WLArray "
+                sig += "Ldev/fabillo/jwayland/WLArray;"
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -278,6 +279,7 @@ def make_java_resource(iface):
     d += "\n"
     d += "import dev.fabillo.jwayland.JWayland;\n"
     d += "import dev.fabillo.jwayland.WLFixed;\n"
+    d += "import dev.fabillo.jwayland.WLArray;\n"
     d += "import dev.fabillo.jwayland.server.WLResource;\n"
     d += "import dev.fabillo.jwayland.annotation.ResourceListener;\n"
     d += "import dev.fabillo.jwayland.annotation.WLNullable;\n"
@@ -327,7 +329,7 @@ def make_java_resource(iface):
             elif arg["type"] == "fixed":
                 d += "WLFixed "
             elif arg["type"] == "array":
-                d += "long " #TODO: Placeholder, arrays unimplemented
+                d += "WLArray "
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -362,8 +364,8 @@ def make_java_resource(iface):
                 d += "WLFixed "
                 sig += "Ldev/fabillo/jwayland/server/WLFixed;"
             elif arg["type"] == "array":
-                d += "long " #TODO: Placeholder, arrays unimplemented
-                sig += "J"
+                d += "WLArray "
+                sig += "Ldev/fabillo/jwayland/WLArray;"
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -419,7 +421,7 @@ def make_c_glue_proxy(iface):
             elif arg["type"] == "fixed":
                 d += "jobject "
             elif arg["type"] == "array":
-                d += "jlong " #TODO: Placeholder, arrays unimplemented
+                d += "jobject "
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -429,6 +431,8 @@ def make_c_glue_proxy(iface):
         d += '\tjfieldID WLProxy_native_ptr = (*env)->GetFieldID(env, WLProxy_class, "native_ptr", "J");\n'
         d += '\tjclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");\n'
         d += '\tjfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");\n'
+        d += '\tjclass WLArray_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLArray");\n'
+        d += '\tjfieldID WLArray_native_ptr = (*env)->GetFieldID(env, WLArray_class, "native_ptr", "J");\n'
         iname = None
         if req["return_proxy"]:
             for arg in req["args"]:
@@ -488,7 +492,7 @@ def make_c_glue_proxy(iface):
                 elif arg["type"] == "fixed":
                     d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
                 elif arg["type"] == "array":
-                    d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
+                    d += '(struct wl_array*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLArray_native_ptr)'
                 elif arg["type"] == "new_id":
                     d += '(uint32_t) 0'
                 else:
@@ -515,7 +519,7 @@ def make_c_glue_proxy(iface):
                 elif arg["type"] == "fixed":
                     d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
                 elif arg["type"] == "array":
-                    d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
+                    d += '(struct wl_array*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLArray_native_ptr)'
                 else:
                     print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                     return
@@ -608,7 +612,7 @@ def make_c_glue_resource(iface):
             elif arg["type"] == "fixed":
                 d += "jobject "
             elif arg["type"] == "array":
-                d += "jlong " #TODO: Placeholder, arrays unimplemented
+                d += "jobject "
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return
@@ -618,6 +622,8 @@ def make_c_glue_resource(iface):
         d += '\tjfieldID WLResource_native_ptr = (*env)->GetFieldID(env, WLResource_class, "native_ptr", "J");\n'
         d += '\tjclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");\n'
         d += '\tjfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");\n'
+        d += '\tjclass WLArray_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLArray");\n'
+        d += '\tjfieldID WLArray_native_ptr = (*env)->GetFieldID(env, WLArray_class, "native_ptr", "J");\n'
         d += '\n'
         d += '\tstruct wl_resource *wresource = (struct wl_resource*)(intptr_t)(*env)->GetLongField(env, obj, WLResource_native_ptr);\n'
         d += '\twl_resource_post_event(wresource, '
@@ -635,7 +641,7 @@ def make_c_glue_resource(iface):
             elif arg["type"] == "fixed":
                 d += '(*env)->GetIntField(env, ' + sanitize_name(arg["name"]) + ', WLFixed_data)'
             elif arg["type"] == "array":
-                d += '(struct wl_array*)(intptr_t) ' + sanitize_name(arg["name"])
+                d += '(struct wl_array*)(intptr_t)(*env)->GetLongField(env, ' + sanitize_name(arg["name"]) + ', WLArray_native_ptr)'
             else:
                 print(f"ERROR: Unrecognized argument type: '{arg['type']}'")
                 return

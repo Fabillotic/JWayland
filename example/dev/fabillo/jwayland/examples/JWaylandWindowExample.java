@@ -1,5 +1,9 @@
 package dev.fabillo.jwayland.examples;
 
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+
+import dev.fabillo.jwayland.WLArray;
 import dev.fabillo.jwayland.WLFixed;
 import dev.fabillo.jwayland.client.ClientDisplay;
 import dev.fabillo.jwayland.client.SimpleShmPool;
@@ -22,7 +26,7 @@ import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy.XDGWmBaseProxyListene
 
 public class JWaylandWindowExample {
 	
-	private static final boolean use_spb = true;
+	private static final boolean use_spb = false;
 	private static WLCompositorProxy compositor;
 	private static XDGWmBaseProxy wm_base;
 	private static WPSinglePixelBufferManagerV1Proxy spbm;
@@ -103,11 +107,8 @@ public class JWaylandWindowExample {
 		toplevel.setListener(new XDGToplevelProxyListener() {
 
 			@Override
-			public void configure(XDGToplevelProxy proxy, int width, int height, long states) {
+			public void configure(XDGToplevelProxy proxy, int width, int height, WLArray states) {
 				System.out.println("TOPLEVEL CONFIGURE!");
-				if(width > 0 && height > 0) {
-					window.ack_configure(0);
-				}
 			}
 
 			@Override
@@ -120,7 +121,15 @@ public class JWaylandWindowExample {
 			}
 
 			@Override
-			public void wm_capabilities(XDGToplevelProxy proxy, long capabilities) {
+			public void wm_capabilities(XDGToplevelProxy proxy, WLArray capabilities) {
+				IntBuffer buf = capabilities.getData().asIntBuffer();
+				for(int i = 0; i < buf.capacity(); i++) {
+					int c = buf.get();
+					if(ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
+						c = Integer.reverseBytes(c);
+					}
+					System.out.println("CAPABILITY: " + c);
+				}
 			}
 		});
 		
@@ -129,7 +138,7 @@ public class JWaylandWindowExample {
 		boolean first_dispatch = false;
 		
 		while(true) {
-			System.out.println("DISPATCH!");
+//			System.out.println("DISPATCH!");
 			display.dispatch();
 			if(!first_dispatch) {
 				first_dispatch = true;

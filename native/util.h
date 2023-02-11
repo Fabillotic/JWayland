@@ -18,6 +18,9 @@ static inline void arguments_to_java_client(JNIEnv *env, void *proxy, const char
 	jclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");
 	jfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");
 	jmethodID WLFixed_init = (*env)->GetMethodID(env, WLFixed_class, "<init>", "()V");
+	jclass WLArray_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLArray");
+	jfieldID WLArray_native_ptr = (*env)->GetFieldID(env, WLArray_class, "native_ptr", "J");
+	jmethodID WLArray_init = (*env)->GetMethodID(env, WLArray_class, "<init>", "()V");
 
 	sig = malloc(200);
 	sig[0] = '\0';
@@ -45,7 +48,8 @@ static inline void arguments_to_java_client(JNIEnv *env, void *proxy, const char
 			n++;
 		}
 		else if(c == 'a') {
-			/* TODO: Not yet supported */
+			strcat(sig, "Ldev/fabillo/jwayland/WLArray;");
+			n++;
 		}
 	}
 	values = malloc(sizeof(jvalue) * n);
@@ -77,6 +81,11 @@ static inline void arguments_to_java_client(JNIEnv *env, void *proxy, const char
 			(*env)->SetIntField(env, values[n].l, WLFixed_data, args[n-1].i);
 			n++;
 		}
+		else if(c == 'a') {
+			values[n].l = (*env)->NewObject(env, WLArray_class, WLArray_init);
+			(*env)->SetLongField(env, values[n].l, WLArray_native_ptr, (jlong)(intptr_t)args[n-1].a);
+			n++;
+		}
 	}
 	*r_values = values;
 	*r_sig = sig;
@@ -97,6 +106,9 @@ static inline void arguments_to_java_server(JNIEnv *env, void *resource, const c
 	jclass WLFixed_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLFixed");
 	jfieldID WLFixed_data = (*env)->GetFieldID(env, WLFixed_class, "data", "I");
 	jmethodID WLFixed_init = (*env)->GetMethodID(env, WLFixed_class, "<init>", "()V");
+	jclass WLArray_class = (*env)->FindClass(env, "dev/fabillo/jwayland/WLArray");
+	jfieldID WLArray_native_ptr = (*env)->GetFieldID(env, WLArray_class, "native_ptr", "J");
+	jmethodID WLArray_init = (*env)->GetMethodID(env, WLArray_class, "<init>", "()V");
 
 	sig = malloc(200);
 	sig[0] = '\0';
@@ -124,7 +136,8 @@ static inline void arguments_to_java_server(JNIEnv *env, void *resource, const c
 			n++;
 		}
 		else if(c == 'a') {
-			/* TODO: Not yet supported */
+			strcat(sig, "Ldev/fabillo/jwayland/WLArray;");
+			n++;
 		}
 	}
 	values = malloc(sizeof(jvalue) * n);
@@ -154,6 +167,11 @@ static inline void arguments_to_java_server(JNIEnv *env, void *resource, const c
 		else if(c == 'f') {
 			values[n].l = (*env)->NewObject(env, WLFixed_class, WLFixed_init);
 			(*env)->SetIntField(env, values[n].l, WLFixed_data, args[n-1].i);
+			n++;
+		}
+		else if(c == 'a') {
+			values[n].l = (*env)->NewObject(env, WLArray_class, WLArray_init);
+			(*env)->SetLongField(env, values[n].l, WLArray_native_ptr, (jlong)(intptr_t)args[n-1].a);
 			n++;
 		}
 	}
