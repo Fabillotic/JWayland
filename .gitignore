@@ -5,6 +5,7 @@ bin/
 classes/
 *.o
 *.class
+*.bak
 jwayland.jar
 jwayland_native.jar
 jwayland_source.jar
