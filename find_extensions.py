@@ -17,14 +17,6 @@ if __name__ == "__main__":
         print("Output directory does not exist!")
         exit()
 
-    i = input(f"This script will delete all files in the '{out_dir.absolute()}' directory. Continue? [y/N] ")
-    if not (i.lower() == "y" or i.lower() == "yes"):
-        print("No confirmation given. Stopping...")
-        exit()
-
-    for x in out_dir.rglob("*.xml"):
-        x.unlink(missing_ok=False)
-
     ext_dir = Path(ext_dir)
     if not (ext_dir.exists() and ext_dir.is_dir()):
         print("Could not find protocols directory!")
@@ -134,9 +126,6 @@ if __name__ == "__main__":
         if c.exists():
             if c.is_dir():
                 print("ERROR! Output location is already a directory!")
-                exit()
-            elif c.is_file():
-                print("File already exists! stopping...")
                 exit()
         shutil.copyfile(o, c)
 
