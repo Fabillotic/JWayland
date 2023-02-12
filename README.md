@@ -23,7 +23,7 @@ The releases provide you pre-scanned and compiled versions of the library.
 
 The extensions are from the most recent release of [wayland-protocols](https://gitlab.freedesktop.org/wayland/wayland-protocols).
 
-In the case that multiple versions of an extension are available, the most stable option is chosen.
+In the case that multiple versions of an extension are in conflict with each other, the most stable option is chosen.
 
 ## Compiling
 1. Copy the required protocol xml files (including the core `wayland.xml`!) to `protocols/`
