@@ -5,15 +5,13 @@
 rm -rf JWayland-release
 git clone https://github.com/Fabillotic/JWayland JWayland-release
 
-# Clone the wayland-protocols repository if necessary
-if [ ! -d "wayland-protocols" ]; then
-	git clone https://gitlab.freedesktop.org/wayland/wayland-protocols
-fi
+# Clone the wayland-protocols repository
+rm -rf wayland-protocols
+git clone https://gitlab.freedesktop.org/wayland/wayland-protocols
 
-# Clone the wayland core repository if necessary
-if [ ! -d "wayland" ]; then
-	git clone https://gitlab.freedesktop.org/wayland/wayland
-fi
+# Clone the wayland core repository
+rm -rf wayland
+git clone https://gitlab.freedesktop.org/wayland/wayland
 
 # Checkout the most recent tag
 git -C wayland-protocols checkout $(git -C wayland-protocols describe --abbrev=0 --tags)
@@ -37,3 +35,5 @@ cp -f JWayland-release/jwayland_source.jar release/jwayland_source.jar
 
 # Remove unnecessary directory
 rm -rf JWayland-release
+rm -rf wayland-protocols
+rm -rf wayland
