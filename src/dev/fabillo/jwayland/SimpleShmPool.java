@@ -1,8 +1,6 @@
-package dev.fabillo.jwayland.client;
+package dev.fabillo.jwayland;
 
 import java.nio.ByteBuffer;
-
-import dev.fabillo.jwayland.JWayland;
 
 public final class SimpleShmPool {
 	

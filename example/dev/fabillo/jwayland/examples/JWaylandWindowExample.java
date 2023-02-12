@@ -3,10 +3,10 @@ package dev.fabillo.jwayland.examples;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
+import dev.fabillo.jwayland.SimpleShmPool;
 import dev.fabillo.jwayland.WLArray;
 import dev.fabillo.jwayland.WLFixed;
 import dev.fabillo.jwayland.client.ClientDisplay;
-import dev.fabillo.jwayland.client.SimpleShmPool;
 import dev.fabillo.jwayland.protocol.client.WLBufferProxy;
 import dev.fabillo.jwayland.protocol.client.WLCompositorProxy;
 import dev.fabillo.jwayland.protocol.client.WLRegistryProxy;
