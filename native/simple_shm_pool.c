@@ -56,10 +56,24 @@ JNIEXPORT jint JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_allocate_1shm_1fi
 	return allocate_shm_file(size);
 }
 
-JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_map_1shm(JNIEnv *env, jclass clazz, jint fd, jint size) {
+JNIEXPORT jobject JNICALL Java_dev_fabillo_jwayland_SimpleShmPool_map_1shm(JNIEnv *env, jclass clazz, jint fd, jint size, jobject flags) {
 	void *data;
 
-	data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	jclass MappedFlags_class = (*env)->FindClass(env, "dev/fabillo/jwayland/SimpleShmPool$MappedFlags");
+	jmethodID MappedFlags_ordinal = (*env)->GetMethodID(env, MappedFlags_class, "ordinal", "()I");
+	jclass IllegalStateException_class = (*env)->FindClass(env, "java/lang/IllegalStateException");
+
+	int ord = (*env)->CallIntMethod(env, flags, MappedFlags_ordinal);
+	int f = -1;
+	switch(ord) {
+		case 0: f = MAP_SHARED; break;
+		case 1: f = MAP_PRIVATE; break;
+		default:
+			(*env)->ThrowNew(env, IllegalStateException_class, "Invalid ordinal for type MappedFlags");
+			return NULL;
+	}
+
+	data = mmap(NULL, size, PROT_READ | PROT_WRITE, f, fd, 0);
 	if(data == MAP_FAILED) {
 		close(fd);
 		return NULL;

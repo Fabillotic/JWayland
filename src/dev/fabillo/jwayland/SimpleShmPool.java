@@ -12,9 +12,9 @@ public final class SimpleShmPool {
 		this.data = data;
 	}
 
-	public static SimpleShmPool create(int size) {
+	public static SimpleShmPool create(int size, MappedFlags flags) {
 		int fd = allocate_shm_file(size);
-		ByteBuffer data = map_shm(fd, size);
+		ByteBuffer data = map_shm(fd, size, flags);
 		SimpleShmPool pool = new SimpleShmPool(fd, data);
 		return pool;
 	}
@@ -41,11 +41,17 @@ public final class SimpleShmPool {
 		return fd;
 	}
 
-	private static native int allocate_shm_file(int size);
-	private static native ByteBuffer map_shm(int fd, int size);
-	private static native void unmap_shm(ByteBuffer buffer);
-	private static native void close_shm_fd(int fd);
-
+	public static native int allocate_shm_file(int size);
+	public static native ByteBuffer map_shm(int fd, int size, MappedFlags flags);
+	public static native void unmap_shm(ByteBuffer buffer);
+	public static native void close_shm_fd(int fd);
+	
+	public static enum MappedFlags {
+		
+		MAP_SHARED, MAP_PRIVATE;
+		
+	}
+	
 	static {
 		JWayland.loadLibrary();
 	}
