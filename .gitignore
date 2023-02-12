@@ -3,6 +3,9 @@
 .settings/
 bin/
 classes/
+wayland/
+wayland-protocols/
+release/
 *.o
 *.class
 *.bak
