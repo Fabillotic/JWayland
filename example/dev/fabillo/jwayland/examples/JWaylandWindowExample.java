@@ -23,6 +23,7 @@ import dev.fabillo.jwayland.protocol.client.XDGToplevelProxy;
 import dev.fabillo.jwayland.protocol.client.XDGToplevelProxy.XDGToplevelProxyListener;
 import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy;
 import dev.fabillo.jwayland.protocol.client.XDGWmBaseProxy.XDGWmBaseProxyListener;
+import dev.fabillo.jwayland.protocol.enums.WLShmFormat;
 
 public class JWaylandWindowExample {
 	
@@ -157,7 +158,7 @@ public class JWaylandWindowExample {
 				else {
 					SimpleShmPool spool = SimpleShmPool.create(500 * 500 * 4);
 					WLShmPoolProxy pool = shm.create_pool(spool.getFileDescriptor(), 500 * 500 * 4);
-					buf = pool.create_buffer(0, 500, 500, 500 * 4, 1);
+					buf = pool.create_buffer(0, 500, 500, 500 * 4, WLShmFormat.FORMAT_ARGB8888);
 					pool.destroy();
 					spool.close_fd();
 					byte[] src = new byte[500 * 500 * 4];

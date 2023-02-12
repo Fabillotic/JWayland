@@ -7,6 +7,7 @@ NATIVE_PROTOCOL_CLIENT_DIR = native/protocol/client
 NATIVE_PROTOCOL_SERVER_DIR = native/protocol/server
 JAVA_PROTOCOL_CLIENT_DIR = src/dev/fabillo/jwayland/protocol/client
 JAVA_PROTOCOL_SERVER_DIR = src/dev/fabillo/jwayland/protocol/server
+JAVA_PROTOCOL_ENUM_DIR = src/dev/fabillo/jwayland/protocol/enums
 UTIL_DIR = native
 BIN_NAME = libjwayland.so
 BIN = native/$(BIN_NAME)
@@ -41,6 +42,7 @@ scan: clean_all
 	python3 scanner.py interfaces native/protocol $(PROTOCOLS)
 	python3 scanner.py client-jni-code $(NATIVE_PROTOCOL_CLIENT_DIR) $(PROTOCOLS)
 	python3 scanner.py server-jni-code $(NATIVE_PROTOCOL_SERVER_DIR) $(PROTOCOLS)
+	python3 scanner.py enum-java-code $(JAVA_PROTOCOL_ENUM_DIR) $(PROTOCOLS)
 	python3 scanner.py client-java-code $(JAVA_PROTOCOL_CLIENT_DIR) $(PROTOCOLS)
 	python3 scanner.py server-java-code $(JAVA_PROTOCOL_SERVER_DIR) $(PROTOCOLS)
 
@@ -49,7 +51,12 @@ clean:
 	rm -rf classes
 
 clean_all: clean
-	rm -f native/protocol/interfaces.c $(NATIVE_PROTOCOL_CLIENT_DIR)/*.c $(NATIVE_PROTOCOL_SERVER_DIR)/*.c $(JAVA_PROTOCOL_CLIENT_DIR)/*.java $(JAVA_PROTOCOL_SERVER_DIR)/*.java
+	rm -f native/protocol/interfaces.c
+	rm -f $(NATIVE_PROTOCOL_CLIENT_DIR)/*.c
+	rm -f $(NATIVE_PROTOCOL_SERVER_DIR)/*.c
+	rm -f $(JAVA_PROTOCOL_CLIENT_DIR)/*.java
+	rm -f $(JAVA_PROTOCOL_SERVER_DIR)/*.java
+	rm -f $(JAVA_PROTOCOL_ENUM_DIR)/*.java
 
 clean-all: clean_all
 

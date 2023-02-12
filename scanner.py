@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 def main():
     parser = argparse.ArgumentParser(prog="scanner.py", description="Generate all the necessary Java and C glue code for JWayland")
-    parser.add_argument("type", choices=["client-jni-code", "client-java-code", "server-jni-code", "server-java-code", "interfaces"])
+    parser.add_argument("type", choices=["enum-java-code", "client-jni-code", "client-java-code", "server-jni-code", "server-java-code", "interfaces"])
     parser.add_argument("directory", type=pathlib.Path)
     parser.add_argument("xmlfile", type=pathlib.Path, nargs="+")
     arg = parser.parse_args()
@@ -22,7 +22,20 @@ def main():
     for x in arg.xmlfile:
         tree = ET.parse(x)
         root = tree.getroot()
-        if arg.type == "client-java-code":
+        if arg.type == "enum-java-code":
+            for e in root.findall("interface"):
+                i = parse_interface(e)
+                if i == None:
+                    return
+                for e2 in i["enums"]:
+                    enum = make_java_enum(e2)
+                    if enum == None:
+                        return
+                    p = pathlib.Path(arg.directory, e2['name'] + ".java")
+                    f = open(p, "w")
+                    f.write(enum)
+                    f.close()
+        elif arg.type == "client-java-code":
             for e in root.findall("interface"):
                 i = parse_interface(e)
                 if i == None:
@@ -95,6 +108,25 @@ def parse_interface(interface):
     print(f"{r['name']}...")
     r["camel_name"] = get_camel_name(r["name"])
     r["version"] = interface.attrib["version"]
+    r["enums"] = []
+    for enum in interface.findall("enum"):
+        name = enum.attrib["name"]
+        n = get_simple_camel_name(name)
+        #n = name[0].upper() + name[1:]
+        e = {"name": r["camel_name"] + n, "entries": []}
+        for ent in enum.findall("entry"):
+            n = name.upper() + "_" + ent.attrib["name"].upper()
+            v = ent.attrib["value"]
+            try:
+                v = int(v)
+            except ValueError:
+                try:
+                    v = int(v, 16)
+                except ValueError:
+                    print(f"Failed to parse enum value {v}!")
+                    return
+            e["entries"].append({"name": n, "value": v})
+        r["enums"].append(e)
     r["requests"] = []
     for req in interface.findall("request"):
         t = {"name": sanitize_name(req.attrib["name"]), "args": []}
@@ -144,6 +176,23 @@ def parse_interface(interface):
             t["args"].append(a)
         r["events"].append(t)
     return r
+
+def make_java_enum(enum):
+    d = ""
+    d += "package dev.fabillo.jwayland.protocol.enums;\n"
+    d += "\n"
+    d += "public class " + enum["name"] + " {\n"
+    d += "\t\n"
+
+    for n, entry in enumerate(enum["entries"]):
+        if n > 0:
+            d += "\t\n"
+        d += "\tpublic static final int " + entry["name"]
+        d += " = " + str(entry["value"]) + ";\n"
+
+    d += "\t\n"
+    d += "}\n"
+    return d
 
 def make_java_proxy(iface):
     cname = iface["camel_name"] + "Proxy"
@@ -870,6 +919,21 @@ def get_camel_name(name):
                     camel_name += c.upper()
             elif not first_underscore:
                 camel_name += c.upper()
+            else:
+                camel_name += c
+    return camel_name
+
+def get_simple_camel_name(name):
+    camel_name = ""
+    for n, c in enumerate(name):
+        if c != "_":
+            if n == 0:
+                camel_name += c.upper()
+            elif name[n - 1] == "_":
+                if n == 1:
+                    camel_name += c
+                else:
+                    camel_name += c.upper()
             else:
                 camel_name += c
     return camel_name
