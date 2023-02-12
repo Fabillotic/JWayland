@@ -4,7 +4,6 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 import dev.fabillo.jwayland.SimpleShmPool;
-import dev.fabillo.jwayland.SimpleShmPool.MappedFlags;
 import dev.fabillo.jwayland.WLArray;
 import dev.fabillo.jwayland.WLFixed;
 import dev.fabillo.jwayland.client.ClientDisplay;
@@ -156,7 +155,7 @@ public class JWaylandWindowExample {
 					view.set_destination(500, 500);
 				}
 				else {
-					SimpleShmPool spool = SimpleShmPool.create(500 * 500 * 4, MappedFlags.MAP_SHARED);
+					SimpleShmPool spool = SimpleShmPool.create(500 * 500 * 4);
 					WLShmPoolProxy pool = shm.create_pool(spool.getFileDescriptor(), 500 * 500 * 4);
 					buf = pool.create_buffer(0, 500, 500, 500 * 4, 1);
 					pool.destroy();
